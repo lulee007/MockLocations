@@ -1,0 +1,43 @@
+<resources>
+
+    <!-- 基本主题，不带actionbar. -->
+    <style name="AppTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+
+        <!-- Remove shadow below action bar Android < 5.0 -->
+        <item name="android:windowContentOverlay">@null</item>
+        <!-- remove shadow below action bar 5.0 -->
+        <!--<item name="android:elevation">0dp</item>-->
+        <!-- Support library compatibility -->
+        <!--<item name="elevation">0dp</item>-->
+
+        <!-- 设置activity切换动画 -->
+        <item name="android:windowAnimationStyle">@style/activityAnimation</item>
+        <item name="android:windowBackground">@color/md_grey_200</item>
+
+
+
+    </style>
+
+    <!--use for custom action bar with toolbar etc-->
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <!--页面切换动画-->
+    <style name="activityAnimation" parent="@android:style/Animation">
+        <item name="android:activityOpenEnterAnimation">@anim/slide_right_in</item>
+        <item name="android:activityOpenExitAnimation">@anim/slide_left_out</item>
+        <item name="android:activityCloseEnterAnimation">@anim/slide_left_in</item>
+        <item name="android:activityCloseExitAnimation">@anim/slide_right_out</item>
+    </style>
+
+    <!--全屏-->
+    <style name="FullscreenTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+</resources>
