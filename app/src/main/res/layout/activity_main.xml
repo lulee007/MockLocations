@@ -17,7 +17,7 @@
     <RelativeLayout
         android:id="@+id/tool_panel"
         android:layout_width="80dp"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/app_bar">
 

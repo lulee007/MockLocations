@@ -27,6 +27,7 @@ import com.lulee007.mocklocations.ui.views.DrawPanelView;
 import com.lulee007.mocklocations.ui.views.EmulatorPanelView;
 import com.lulee007.mocklocations.ui.views.IMainView;
 import com.lulee007.mocklocations.util.RxBus;
+import com.nineoldandroids.animation.Animator;
 import com.orhanobut.logger.Logger;
 import com.umeng.analytics.MobclickAgent;
 
@@ -212,8 +213,8 @@ public class MainActivity extends MLBaseActivity implements IMainView {
 
         fabmPanelSwitcher.collapse();
 
-        View toShowPanelView ;
-        View toHidePanelView ;
+        final View toShowPanelView ;
+        final View toHidePanelView ;
 
         Object toHide ;
 
@@ -241,15 +242,45 @@ public class MainActivity extends MLBaseActivity implements IMainView {
             isNeedDelay = true;
             YoYo.with(Techniques.FadeOutLeft)
                     .duration(200)
+                    .withListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            toolPanel.removeView(toHidePanelView);
+                            Logger.d("fade out and remove a view");
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+
+                        }
+                    })
                     .playOn(toolPanel);
-            toolPanel.removeView(toHidePanelView);
         }
 
-        toolPanel.addView(toShowPanelView);
+        Observable.timer(200,TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Long>() {
+                    @Override
+                    public void call(Long aLong) {
+                        toolPanel.addView(toShowPanelView);
+                        Logger.d("wait end 1300 and add a view");
+
+                    }
+                });
 
         YoYo.with(Techniques.SlideInRight)
                 .duration(400)
-                .delay(isNeedDelay ? 200 : 0)
+                .delay(isNeedDelay ? 250 : 0)
                 .playOn(toolPanel);
     }
 
