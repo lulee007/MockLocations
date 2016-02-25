@@ -25,4 +25,12 @@ public class EmulatorPanelView {
     public View getEmulatorPanelView() {
         return emulatorPanelView;
     }
+
+    public boolean isInEmulateMode() {
+        return true;
+    }
+
+    public void cancelEmulate() {
+
+    }
 }

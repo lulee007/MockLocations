@@ -36,7 +36,15 @@ public class DrawPanelView {
     private View drawPanelView;
     private DrawMode drawMode;
 
-    enum DrawMode {
+    public boolean isInEditMode(){
+        return drawMode!=DrawMode.TO_START;
+    }
+
+    public void cancelEdit() {
+        btnBeginOrCancelDraw.performClick();
+    }
+
+    public enum DrawMode {
         TO_START,
         STARTED,//btn begin or cancel
         PANNING,
@@ -81,46 +89,47 @@ public class DrawPanelView {
         btnPanMap.setEnabled(false);
         btnSave.setEnabled(false);
         switch (newMode) {
-            case PANNING:
+            case PANNING://正在移动地图，不能绘制轨迹
                 btnPanMap.setText("停止");
                 btnPanMap.setEnabled(true);
                 RxBus.getDefault().send(new MapPanEvent(true));
                 break;
-            case TO_PAN:
+            case TO_PAN://切换到绘制模式，不能移动地图
                 btnPanMap.setText("移动");
                 btnPanMap.setEnabled(true);
                 btnBeginOrCancelDraw.setEnabled(true);
                 btnCompleteDraw.setEnabled(true);
                 RxBus.getDefault().send(new MapPanEvent(false));
                 break;
-            case TO_START:
+            case TO_START://取消了绘制，可以移动地图
                 btnBeginOrCancelDraw.setText("开始");
                 btnBeginOrCancelDraw.setEnabled(true);
                 RxBus.getDefault().send(new MapPanEvent(true));
-
                 break;
-            case STARTED:
+            case STARTED://进入绘制模式，不能移动地图
                 btnBeginOrCancelDraw.setText("取消");
                 btnBeginOrCancelDraw.setEnabled(true);
                 btnPanMap.setEnabled(true);
                 btnCompleteDraw.setEnabled(true);
                 RxBus.getDefault().send(new MapPanEvent(false));
-
                 break;
-            case COMPLETED:
+            case COMPLETED://完成了绘制，可以移动地图
                 btnSave.setEnabled(true);
                 btnBeginOrCancelDraw.setText("取消");
                 btnBeginOrCancelDraw.setEnabled(true);
+                RxBus.getDefault().send(new MapPanEvent(true));
                 break;
-            case SAVE:
+            case SAVE://进行保存轨迹，可以移动地图，切换为待绘制模式
                 btnBeginOrCancelDraw.setEnabled(true);
                 btnBeginOrCancelDraw.setText("开始");
                 btnSave.setEnabled(true);
                 drawMode = DrawMode.TO_START;
+                RxBus.getDefault().send(new MapPanEvent(true));
                 break;
             default:
                 break;
         }
+        RxBus.getDefault().send(new DrawActionEvent(drawMode));
     }
 
     public class MapPanEvent {
@@ -131,9 +140,23 @@ public class DrawPanelView {
 
         private boolean isPanEnabled;
 
+
         public MapPanEvent(boolean isPanEnabled) {
 
             this.isPanEnabled = isPanEnabled;
+        }
+    }
+
+    public class DrawActionEvent {
+        public DrawMode getDrawMode() {
+            return drawMode;
+        }
+
+        private DrawMode drawMode;
+
+        public DrawActionEvent(DrawMode drawMode) {
+
+            this.drawMode = drawMode;
         }
     }
 }

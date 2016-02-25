@@ -26,6 +26,7 @@ import com.lulee007.mocklocations.presenter.MainPresenter;
 import com.lulee007.mocklocations.ui.views.DrawPanelView;
 import com.lulee007.mocklocations.ui.views.EmulatorPanelView;
 import com.lulee007.mocklocations.ui.views.IMainView;
+import com.lulee007.mocklocations.util.DrawTool;
 import com.lulee007.mocklocations.util.RxBus;
 import com.nineoldandroids.animation.Animator;
 import com.orhanobut.logger.Logger;
@@ -38,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -73,6 +75,7 @@ public class MainActivity extends MLBaseActivity implements IMainView {
     private MainPresenter mainPresenter;
     private MapView mMapView;
     private boolean doubleClickExit;
+    private DrawTool drawTool;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,13 +117,15 @@ public class MainActivity extends MLBaseActivity implements IMainView {
 //            }
 //        });
 
-        Subscription subscription = RxBus.getDefault().toObserverable(DrawPanelView.MapPanEvent.class)
+        Subscription mapPanSubscription = RxBus.getDefault().toObserverable(DrawPanelView.MapPanEvent.class)
                 .subscribe(
                         new Action1<DrawPanelView.MapPanEvent>() {
                             @Override
                             public void call(DrawPanelView.MapPanEvent mapPanEvent) {
                                 Logger.d("subscribe: toggle map pan, enable pan:%s", Boolean.toString(mapPanEvent.isPanEnabled()));
                                 mBaiduMap.getUiSettings().setScrollGesturesEnabled(mapPanEvent.isPanEnabled());
+
+
                             }
                         },
                         new Action1<Throwable>() {
@@ -130,7 +135,8 @@ public class MainActivity extends MLBaseActivity implements IMainView {
                             }
                         }
                 );
-        addSubscription(subscription);
+        addSubscription(mapPanSubscription);
+
 
     }
 
@@ -200,23 +206,54 @@ public class MainActivity extends MLBaseActivity implements IMainView {
 
     @Override
     public void showDrawPanel() {
-        showPanel(DrawPanelView.class);
+        if (emulatorPanelView != null && emulatorPanelView.isInEmulateMode()) {
+            new SweetAlertDialog(this).setTitleText("注意")
+                    .setContentText("正在模拟轨迹模式当中，要切换模式么？")
+                    .setConfirmText("停止模拟并切换")
+                    .setCancelText("取消切换")
+                    .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sweetAlertDialog) {
+                            emulatorPanelView.cancelEmulate();
+                            sweetAlertDialog.dismiss();
+                            showPanel(DrawPanelView.class);
+                        }
+                    }).show();
+        } else {
+            showPanel(DrawPanelView.class);
+        }
     }
 
     @Override
     public void showEmulatorPanel() {
-        showPanel(EmulatorPanelView.class);
+        if (drawPanelView != null && drawPanelView.isInEditMode()) {
+            new SweetAlertDialog(this).setTitleText("注意")
+                    .setContentText("正在绘制轨迹模式当中，要切换模式么？")
+                    .setConfirmText("不保存了并切换")
+                    .setCancelText("取消切换")
+                    .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sweetAlertDialog) {
+                            drawPanelView.cancelEdit();
+                            sweetAlertDialog.dismiss();
+                            showPanel(EmulatorPanelView.class);
+                        }
+                    }).show();
+
+        } else {
+            showPanel(EmulatorPanelView.class);
+        }
     }
+
 
     private void showPanel(Class toShowClass) {
 
-
         fabmPanelSwitcher.collapse();
 
-        final View toShowPanelView ;
-        final View toHidePanelView ;
+        final View toShowPanelView;
+        final View toHidePanelView;
 
-        Object toHide ;
+        Object toHide;
 
         if (toShowClass.equals(DrawPanelView.class)) {
             drawPanelView = drawPanelView != null ? drawPanelView : new DrawPanelView(toolPanel);
@@ -267,14 +304,12 @@ public class MainActivity extends MLBaseActivity implements IMainView {
                     .playOn(toolPanel);
         }
 
-        Observable.timer(200,TimeUnit.MILLISECONDS)
+        Observable.timer(200, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Long>() {
                     @Override
                     public void call(Long aLong) {
                         toolPanel.addView(toShowPanelView);
-                        Logger.d("wait end 1300 and add a view");
-
                     }
                 });
 
@@ -308,6 +343,8 @@ public class MainActivity extends MLBaseActivity implements IMainView {
          */
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("轨迹再现使用工具");
+
+        drawTool = new DrawTool(mBaiduMap);
     }
 
     @Override
@@ -320,6 +357,9 @@ public class MainActivity extends MLBaseActivity implements IMainView {
     @OnClick({R.id.fab_show_draw_panel, R.id.fab_show_emulator_panel})
     public void onClick(View view) {
         switch (view.getId()) {
+            case R.id.action_settings:
+                //TODO setting page
+                break;
             case R.id.fab_show_draw_panel:
                 mainPresenter.showDrawPanel();
                 break;

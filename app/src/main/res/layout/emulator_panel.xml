@@ -8,7 +8,7 @@
     android:gravity="center_horizontal">
 
     <Button
-        android:id="@+id/btn_begin_or_cancel_draw"
+        android:id="@+id/btn_open_gps_file"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/to_start_draw" />
