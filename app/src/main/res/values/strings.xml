@@ -7,4 +7,8 @@
     <string name="to_pan_map">移动</string>
     <string name="complete_draw">完成</string>
     <string name="save_draw">保存</string>
+    <string name="add_gps_record">新建轨迹</string>
+    <string name="replay_gps_record">轨迹再现</string>
+    <string name="action_about">关于</string>
+    <string name="action_exit">退出</string>
 </resources>

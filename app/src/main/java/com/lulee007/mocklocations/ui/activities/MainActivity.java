@@ -1,39 +1,77 @@
 package com.lulee007.mocklocations.ui.activities;
 
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.RelativeLayout;
 
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.BaiduMapOptions;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.Polyline;
 import com.baidu.mapapi.model.LatLng;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
+import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.lulee007.mocklocations.R;
 import com.lulee007.mocklocations.base.MLBaseActivity;
+import com.lulee007.mocklocations.presenter.MainPresenter;
 import com.lulee007.mocklocations.ui.views.DrawPanelView;
+import com.lulee007.mocklocations.ui.views.EmulatorPanelView;
+import com.lulee007.mocklocations.ui.views.IMainView;
 import com.lulee007.mocklocations.util.RxBus;
 import com.orhanobut.logger.Logger;
+import com.umeng.analytics.MobclickAgent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func1;
 
-public class MainActivity extends MLBaseActivity {
+public class MainActivity extends MLBaseActivity implements IMainView {
 
-    MapView mMapView = null;
     BaiduMap mBaiduMap;
     List<LatLng> points = new ArrayList<LatLng>();
     OverlayOptions ooPolyline;
     Polyline mPolyline;
+
     @Bind(R.id.tool_panel)
     RelativeLayout toolPanel;
+    @Bind(R.id.toolbar)
+    Toolbar toolbar;
+    @Bind(R.id.app_bar)
+    AppBarLayout appBar;
+
+    @Bind(R.id.fab_show_draw_panel)
+    FloatingActionButton fabShowDrawPanel;
+    @Bind(R.id.fab_show_emulator_panel)
+    FloatingActionButton fabShowEmulatorPanel;
+    @Bind(R.id.fabm_panel_switcher)
+    FloatingActionsMenu fabmPanelSwitcher;
+    @Bind(R.id.map_root)
+    RelativeLayout mapRoot;
+
+    private DrawPanelView drawPanelView;
+    private EmulatorPanelView emulatorPanelView;
+
+    private MainPresenter mainPresenter;
+    private MapView mMapView;
+    private boolean doubleClickExit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,16 +82,13 @@ public class MainActivity extends MLBaseActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        DrawPanelView drawPanelView = new DrawPanelView(toolPanel);
-        toolPanel.addView(drawPanelView.getDrawPanelView());
+        mainPresenter = new MainPresenter(this);
+        mainPresenter.initView();
+//        mainPresenter.showDrawPanel();
 
-        //获取地图控件引用
-        mMapView = (MapView) findViewById(R.id.bmapView);
 
-        mBaiduMap = mMapView.getMap();
-        //设置初始位置
-        mBaiduMap.setMapStatus(MapStatusUpdateFactory.newLatLng(new LatLng(32.129927, 118.913191)));
-        // 构造折线点坐标
+//        mMapView.getMap().setOnMapLoadedCallback();
+
 
 //        ooPolyline = new PolylineOptions().width(6).points(points);
 
@@ -83,7 +118,7 @@ public class MainActivity extends MLBaseActivity {
                         new Action1<DrawPanelView.MapPanEvent>() {
                             @Override
                             public void call(DrawPanelView.MapPanEvent mapPanEvent) {
-                                Logger.d("subscribe: toggle map pan, enable pan:%s",Boolean.toString(mapPanEvent.isPanEnabled()));
+                                Logger.d("subscribe: toggle map pan, enable pan:%s", Boolean.toString(mapPanEvent.isPanEnabled()));
                                 mBaiduMap.getUiSettings().setScrollGesturesEnabled(mapPanEvent.isPanEnabled());
                             }
                         },
@@ -120,4 +155,146 @@ public class MainActivity extends MLBaseActivity {
         mMapView.onPause();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_about:
+                //TODO about page
+                return true;
+            case R.id.action_exit:
+                mainPresenter.exitApp();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (fabmPanelSwitcher.isExpanded()) {
+            fabmPanelSwitcher.collapse();
+        }
+        if (!doubleClickExit) {
+            showToast("再按一次退出应用，后台运行请按 Home 键。");
+            doubleClickExit = true;
+            Observable.timer(2, TimeUnit.SECONDS)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .map(new Func1<Long, Object>() {
+                        @Override
+                        public Object call(Long aLong) {
+                            doubleClickExit = false;
+                            return null;
+                        }
+                    }).subscribe();
+        } else {
+            mainPresenter.exitApp();
+        }
+    }
+
+    @Override
+    public void showDrawPanel() {
+        showPanel(DrawPanelView.class);
+    }
+
+    @Override
+    public void showEmulatorPanel() {
+        showPanel(EmulatorPanelView.class);
+    }
+
+    private void showPanel(Class toShowClass) {
+
+
+        fabmPanelSwitcher.collapse();
+
+        View toShowPanelView ;
+        View toHidePanelView ;
+
+        Object toHide ;
+
+        if (toShowClass.equals(DrawPanelView.class)) {
+            drawPanelView = drawPanelView != null ? drawPanelView : new DrawPanelView(toolPanel);
+            toShowPanelView = drawPanelView.getDrawPanelView();
+
+            toHide = emulatorPanelView;
+            toHidePanelView = emulatorPanelView != null ? emulatorPanelView.getEmulatorPanelView() : null;
+
+        } else {
+            emulatorPanelView = emulatorPanelView != null ? emulatorPanelView : new EmulatorPanelView(toolPanel);
+            toShowPanelView = emulatorPanelView.getEmulatorPanelView();
+
+            toHide = drawPanelView;
+            toHidePanelView = drawPanelView != null ? drawPanelView.getDrawPanelView() : null;
+
+        }
+
+        if (toolPanel.indexOfChild(toShowPanelView) != -1)
+            return;
+
+        boolean isNeedDelay = false;
+        if (toHide != null) {
+            isNeedDelay = true;
+            YoYo.with(Techniques.FadeOutLeft)
+                    .duration(200)
+                    .playOn(toolPanel);
+            toolPanel.removeView(toHidePanelView);
+        }
+
+        toolPanel.addView(toShowPanelView);
+
+        YoYo.with(Techniques.SlideInRight)
+                .duration(400)
+                .delay(isNeedDelay ? 200 : 0)
+                .playOn(toolPanel);
+    }
+
+    @Override
+    public void initView() {
+
+        /**
+         * 初始化地图部分
+         * 设置不显示地图缩放控件，比例尺控件
+         * 设置地图初始化中心点
+         */
+        BaiduMapOptions options = new BaiduMapOptions();
+        options.zoomControlsEnabled(false);
+        options.scaleControlEnabled(false);
+        mMapView = new MapView(this, options);
+        RelativeLayout.LayoutParams params_map = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+        mapRoot.addView(mMapView, params_map);
+        mBaiduMap = mMapView.getMap();
+        //设置初始位置
+        mBaiduMap.setMapStatus(MapStatusUpdateFactory.newLatLng(new LatLng(32.129927, 118.913191)));
+
+        /**
+         * 设置标题
+         */
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("轨迹再现使用工具");
+    }
+
+    @Override
+    public void exitApp() {
+        //TODO stop gps service
+        MobclickAgent.onKillProcess(this);
+        android.os.Process.killProcess(android.os.Process.myPid());
+    }
+
+    @OnClick({R.id.fab_show_draw_panel, R.id.fab_show_emulator_panel})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.fab_show_draw_panel:
+                mainPresenter.showDrawPanel();
+                break;
+            case R.id.fab_show_emulator_panel:
+                mainPresenter.showEmulatorPanel();
+                break;
+        }
+    }
 }

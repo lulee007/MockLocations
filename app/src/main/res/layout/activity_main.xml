@@ -1,25 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity">
+
+    <include layout="@layout/app_bar" />
+
+    <RelativeLayout
+        android:id="@+id/map_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/app_bar" />
 
     <RelativeLayout
         android:id="@+id/tool_panel"
         android:layout_width="80dp"
         android:layout_height="match_parent"
-        android:layout_alignParentRight="true">
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/app_bar">
 
     </RelativeLayout>
 
-    <com.baidu.mapapi.map.MapView
-        android:id="@+id/bmapView"
-        android:layout_width="match_parent"
-        android:layout_height="fill_parent"
-        android:layout_toLeftOf="@+id/tool_panel"
-        android:clickable="true" />
+    <com.getbase.floatingactionbutton.FloatingActionsMenu
+        android:id="@+id/fabm_panel_switcher"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
+        fab:fab_labelStyle="@style/menu_labels_style"
+        fab:fab_labelsPosition="left">
 
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_show_draw_panel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_colorNormal="@color/md_white_1000"
+            fab:fab_colorPressed="@color/md_grey_200"
+            fab:fab_icon="@mipmap/ic_edit"
+            fab:fab_title="@string/add_gps_record" />
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_show_emulator_panel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_colorNormal="@color/md_white_1000"
+            fab:fab_colorPressed="@color/md_grey_200"
+            fab:fab_icon="@mipmap/ic_emulator"
+            fab:fab_title="@string/replay_gps_record"/>
+
+    </com.getbase.floatingactionbutton.FloatingActionsMenu>
 </RelativeLayout>
