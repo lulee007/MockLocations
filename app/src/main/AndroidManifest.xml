@@ -14,15 +14,26 @@
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
 
     <application
+        android:name=".base.MLApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="false"
         android:theme="@style/AppTheme"
         tools:replace="android:icon">
+        <!--百度地图-->
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="${BAIDU_LBSAPI_API_KEY}" />
+        <!--BUG HD -->
+        <meta-data
+            android:name="BUG_HD_SDK_GENERAL_KEY"
+            android:value="${BUG_HD_SDK_GENERAL_KEY}" />
+        <!--友盟统计分析-->
+        <meta-data
+            android:name="UMENG_APPKEY"
+            android:value="${UMENG_APPKEY}"></meta-data>
+
         <activity android:name=".ui.activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

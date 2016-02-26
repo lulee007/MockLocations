@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MockLocations</string>
+    <string name="app_name">轨迹再现</string>
     <string name="btn_retry">重试</string>
     <string name="no_data">暂无数据，看看其他的吧。</string>
     <string name="something_wrong">发生了一个错误。</string>
