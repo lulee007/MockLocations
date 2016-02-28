@@ -1,18 +1,21 @@
 package com.lulee007.mocklocations.util;
 
+import android.content.Context;
 import android.graphics.Point;
 import android.util.Log;
 import android.view.MotionEvent;
 
 import com.baidu.mapapi.map.BaiduMap;
-import com.baidu.mapapi.map.CircleOptions;
+import com.baidu.mapapi.map.BitmapDescriptor;
+import com.baidu.mapapi.map.BitmapDescriptorFactory;
+import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.Polyline;
 import com.baidu.mapapi.map.PolylineOptions;
-import com.baidu.mapapi.map.Stroke;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.utils.DistanceUtil;
 import com.google.gson.Gson;
+import com.lulee007.mocklocations.R;
 import com.lulee007.mocklocations.ui.views.DrawPanelView;
 import com.lulee007.mocklocations.util.coordtransform.CPoint;
 import com.lulee007.mocklocations.util.coordtransform.CoordinateConversion;
@@ -21,12 +24,8 @@ import com.orhanobut.logger.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
-import rx.Observable;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 
 /**
  * User: lulee007@live.com
@@ -35,16 +34,19 @@ import rx.schedulers.Schedulers;
  */
 public class DrawTool {
     private BaiduMap mBaiduMap;
+    private Context mContext;
     private List<LatLng> mPoints;
     private PolylineOptions mPolylineOptions;
     private Polyline mPolyline;
     private boolean isInEditMode;
     private Subscription drawActionSubscription;
+    private Subscription mapPanSubscription;
 
 
-    public DrawTool(BaiduMap baiduMap) {
+    public DrawTool(BaiduMap baiduMap, Context mContext) {
 
         mBaiduMap = baiduMap;
+        this.mContext = mContext;
         init();
     }
 
@@ -76,28 +78,7 @@ public class DrawTool {
     public void save() {
         isInEditMode = false;
         Logger.d("保存编辑！");
-        Logger.json(new Gson().toJson(mPoints));
-//        Observable.from(mPoints)
-//                .map(new Func1<LatLng, CPoint>() {
-//                    @Override
-//                    public CPoint call(LatLng latLng) {
-//                        CPoint gps= CoordinateConversion.bg2gps(latLng.longitude, latLng.latitude);
-//                        return gps;
-//                    }
-//                })
-//                .toList()
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribeOn(Schedulers.io())
-//                .doOnNext(new Action1<List<CPoint>>() {
-//                    @Override
-//                    public void call(List<CPoint> CPoints) {
-//                        try {
-//                            Thread.sleep(1000);
-//                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                })
+        new GpsJsonFileHelper(mContext).saveJson(mPoints);
 
     }
 
@@ -119,13 +100,16 @@ public class DrawTool {
                     return;
                 LatLng xy = mBaiduMap.getProjection().fromScreenLocation(new Point((int) motionEvent.getX(), (int) motionEvent.getY()));
                 Log.d("xy", String.format("x:%f   y:%f", xy.longitude, xy.latitude));
-                CPoint gps= CoordinateConversion.bg2gps(xy.longitude, xy.latitude);
+                CPoint gps = CoordinateConversion.bg2gps(xy.longitude, xy.latitude);
                 Log.d("gps", String.format("x:%f   y:%f", gps.getLng(), gps.getLat()));
                 if (mPoints.size() == 1) {
                     // 添加圆 作为起点
-                    OverlayOptions ooCircle = new CircleOptions().fillColor(0x000000FF)
-                            .center(xy).stroke(new Stroke(10, 0xAA000000))
-                            .radius(10);
+                    //准备 marker 的图片
+                    BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.mipmap.point);
+                    OverlayOptions ooCircle = new MarkerOptions()
+                            .position(xy)
+                            .animateType(MarkerOptions.MarkerAnimateType.grow)
+                            .icon(bitmap);
                     mBaiduMap.addOverlay(ooCircle);
                     mPoints.add(xy);
                     return;
@@ -148,7 +132,22 @@ public class DrawTool {
                 }
             }
         });
-
+        mapPanSubscription = RxBus.getDefault().toObserverable(DrawPanelView.MapPanEvent.class)
+                .subscribe(
+                        new Action1<DrawPanelView.MapPanEvent>() {
+                            @Override
+                            public void call(DrawPanelView.MapPanEvent mapPanEvent) {
+                                Logger.d("subscribe: toggle map pan, enable pan:%s", Boolean.toString(mapPanEvent.isPanEnabled()));
+                                mBaiduMap.getUiSettings().setScrollGesturesEnabled(mapPanEvent.isPanEnabled());
+                            }
+                        },
+                        new Action1<Throwable>() {
+                            @Override
+                            public void call(Throwable throwable) {
+                                Logger.e(throwable, "map pan event error");
+                            }
+                        }
+                );
         drawActionSubscription = RxBus.getDefault().toObserverable(DrawPanelView.DrawActionEvent.class)
                 .subscribe(
                         new Action1<DrawPanelView.DrawActionEvent>() {

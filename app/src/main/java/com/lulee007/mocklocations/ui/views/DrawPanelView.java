@@ -67,7 +67,7 @@ public class DrawPanelView {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_begin_or_cancel_draw:
-                drawMode = drawMode == DrawMode.TO_START ? DrawMode.STARTED : DrawMode.TO_START;
+                drawMode = drawMode == DrawMode.TO_START ||drawMode == DrawMode.SAVE ? DrawMode.STARTED : DrawMode.TO_START;
                 drawModeChanged(drawMode);
                 break;
             case R.id.btn_pan_map:
@@ -123,13 +123,13 @@ public class DrawPanelView {
                 btnBeginOrCancelDraw.setEnabled(true);
                 btnBeginOrCancelDraw.setText("开始");
                 btnSave.setEnabled(true);
-                drawMode = DrawMode.TO_START;
                 RxBus.getDefault().send(new MapPanEvent(true));
                 break;
             default:
                 break;
         }
         RxBus.getDefault().send(new DrawActionEvent(drawMode));
+
     }
 
     public class MapPanEvent {

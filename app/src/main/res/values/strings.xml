@@ -12,4 +12,10 @@
     <string name="action_about">关于</string>
     <string name="action_exit">退出</string>
     <string name="action_setting">设置</string>
+    <string name="to_open_gps_file">打开</string>
+    <string name="to_start_emulator">开始</string>
+    <string name="to_pause_emulator">暂停</string>
+    <string name="to_holding_emulator">等待</string>
+    <string name="to_continue_emulator">继续</string>
+    <string name="to_stop_emulator">停止</string>
 </resources>

@@ -27,6 +27,7 @@ import com.lulee007.mocklocations.ui.views.DrawPanelView;
 import com.lulee007.mocklocations.ui.views.EmulatorPanelView;
 import com.lulee007.mocklocations.ui.views.IMainView;
 import com.lulee007.mocklocations.util.DrawTool;
+import com.lulee007.mocklocations.util.MockLocationHelper;
 import com.lulee007.mocklocations.util.RxBus;
 import com.nineoldandroids.animation.Animator;
 import com.orhanobut.logger.Logger;
@@ -76,6 +77,7 @@ public class MainActivity extends MLBaseActivity implements IMainView {
     private MapView mMapView;
     private boolean doubleClickExit;
     private DrawTool drawTool;
+    private MockLocationHelper mockLocationHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,25 +119,7 @@ public class MainActivity extends MLBaseActivity implements IMainView {
 //            }
 //        });
 
-        Subscription mapPanSubscription = RxBus.getDefault().toObserverable(DrawPanelView.MapPanEvent.class)
-                .subscribe(
-                        new Action1<DrawPanelView.MapPanEvent>() {
-                            @Override
-                            public void call(DrawPanelView.MapPanEvent mapPanEvent) {
-                                Logger.d("subscribe: toggle map pan, enable pan:%s", Boolean.toString(mapPanEvent.isPanEnabled()));
-                                mBaiduMap.getUiSettings().setScrollGesturesEnabled(mapPanEvent.isPanEnabled());
 
-
-                            }
-                        },
-                        new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                Logger.e(throwable, "map pan event error");
-                            }
-                        }
-                );
-        addSubscription(mapPanSubscription);
 
 
     }
@@ -229,7 +213,7 @@ public class MainActivity extends MLBaseActivity implements IMainView {
         if (drawPanelView != null && drawPanelView.isInEditMode()) {
             new SweetAlertDialog(this).setTitleText("注意")
                     .setContentText("正在绘制轨迹模式当中，要切换模式么？")
-                    .setConfirmText("不保存了并切换")
+                    .setConfirmText("不保存，并切换")
                     .setCancelText("取消切换")
                     .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
                         @Override
@@ -342,9 +326,11 @@ public class MainActivity extends MLBaseActivity implements IMainView {
          * 设置标题
          */
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("轨迹再现使用工具");
+        getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
 
-        drawTool = new DrawTool(mBaiduMap);
+        drawTool = new DrawTool(mBaiduMap, this);
+
+        mockLocationHelper = new MockLocationHelper(mBaiduMap);
     }
 
     @Override

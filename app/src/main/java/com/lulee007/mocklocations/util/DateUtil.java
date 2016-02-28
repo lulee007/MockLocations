@@ -5,6 +5,7 @@ import com.orhanobut.logger.Logger;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * User: lulee007@live.com
@@ -47,8 +48,7 @@ public class DateUtil {
     }
 
     /**
-     * 将长时间格式字符串转换为时间 yyyy-MM-dd HH:mm:ss
-     * 2015-04-02T15:59:58.924Z
+     * 将长时间格式字符串 yyyy-MM-dd HH:mm:ss 转换为时间
      * @param strDate
      * @return
      */
@@ -57,5 +57,25 @@ public class DateUtil {
         ParsePosition pos = new ParsePosition(0);
         Date strtodate = formatter.parse(strDate, pos);
         return strtodate;
+    }
+
+    /**
+     * 时间转为字符串 yyyy-MM-dd HH:mm:ss
+     * @param date
+     * @return 'yyyy-MM-dd HH:mm:ss'
+     */
+    public static String dateToStr(Date date){
+        SimpleDateFormat formatter = new SimpleDateFormat(
+                "yyyy-MM-dd HH:mm:ss", Locale.CHINESE);
+        Date curDate = new Date(System.currentTimeMillis());// 获取当前时间
+        return formatter.format(curDate);
+    }
+
+    /**
+     * 当前时间转为字符串 yyyy-MM-dd HH:mm:ss
+     * @return
+     */
+    public static String currentDateToStr(){
+        return dateToStr(new Date());
     }
 }

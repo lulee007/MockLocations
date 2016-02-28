@@ -34,12 +34,6 @@ public class MLApplication extends Application {
         //内存泄露检测
         LeakCanary.install(this);
 
-        //only required if you add a custom or generic font on your own
-        Iconics.init(getApplicationContext());
-        //Generic font creation process
-        GenericFont xtIconFont = IconFontUtil.buildXTFont();
-        Iconics.registerFont(xtIconFont);
-
         FIR.init(this);
 
         // 如果没有使用PackerNg打包添加渠道，默认返回的是""

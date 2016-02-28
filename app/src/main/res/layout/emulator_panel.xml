@@ -6,28 +6,38 @@
 
     android:padding="8dp"
     android:gravity="center_horizontal">
-
     <Button
         android:id="@+id/btn_open_gps_file"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/to_start_draw" />
-
+        android:text="@string/to_open_gps_file" />
     <Button
-        android:id="@+id/btn_pan_map"
+        android:id="@+id/btn_start_emulator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/to_pan_map" />
+        android:text="@string/to_start_emulator" />
 
     <Button
-        android:id="@+id/btn_complete_draw"
+        android:id="@+id/btn_pause_emulator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/complete_draw" />
+        android:text="@string/to_pause_emulator" />
 
     <Button
-        android:id="@+id/btn_save"
+        android:id="@+id/btn_holding_emulator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/save_draw" />
+        android:text="@string/to_holding_emulator" />
+
+    <Button
+        android:id="@+id/btn_continue_emulator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/to_continue_emulator" />
+
+    <Button
+        android:id="@+id/btn_stop_emulator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/to_stop_emulator" />
 </LinearLayout>
