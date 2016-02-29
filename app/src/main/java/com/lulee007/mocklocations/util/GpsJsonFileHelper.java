@@ -70,13 +70,7 @@ public class GpsJsonFileHelper {
                                 .doOnNext(new Action1<List<CPoint>>() {
                                     @Override
                                     public void call(List<CPoint> CPoints) {
-
-                                        try {
-                                            Thread.sleep(1000);
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                        }
-                                        String fileName = String.format(sAppFolder + "/%s_%s_%l", input.toString(), "BD", new Date().getTime());
+                                        String fileName = String.format(sAppFolder + "/%s_%s_%d.json", input.toString(), "BD", new Date().getTime());
                                         Logger.d("save file:%s", fileName);
                                         File dataFolder = new File(sAppFolder);
                                         dataFolder.mkdirs();
@@ -108,6 +102,7 @@ public class GpsJsonFileHelper {
                                         new Action1<Throwable>() {
                                             @Override
                                             public void call(Throwable throwable) {
+                                                Logger.e(throwable,"保存 gps 到文件失败了");
                                                 sweetAlertDialog
                                                         .setTitleText("保存失败")
                                                         .setConfirmText("确定")
