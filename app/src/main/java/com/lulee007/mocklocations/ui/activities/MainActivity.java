@@ -14,8 +14,6 @@ import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BaiduMapOptions;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
-import com.baidu.mapapi.map.OverlayOptions;
-import com.baidu.mapapi.map.Polyline;
 import com.baidu.mapapi.model.LatLng;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
@@ -34,7 +32,6 @@ import com.nineoldandroids.animation.Animator;
 import com.orhanobut.logger.Logger;
 import com.umeng.analytics.MobclickAgent;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -90,6 +87,7 @@ public class MainActivity extends MLBaseActivity implements IMainView {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mainPresenter.unSubscribeAll();
         //在activity执行onDestroy时执行mMapView.onDestroy()，实现地图生命周期管理
         mMapView.onDestroy();
     }
@@ -368,13 +366,11 @@ public class MainActivity extends MLBaseActivity implements IMainView {
      * 初始化地图部分
      * 设置不显示地图缩放控件，比例尺控件
      * 设置地图初始化中心点
+     * @param options
      */
     @Override
-    public void configBaiduMap() {
-        BaiduMapOptions options = new BaiduMapOptions();
-        options.zoomControlsEnabled(false);
-        options.scaleControlEnabled(false);
-        options.rotateGesturesEnabled(false);
+    public void configBaiduMap(BaiduMapOptions options) {
+
         mMapView = new MapView(this, options);
         RelativeLayout.LayoutParams params_map = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);

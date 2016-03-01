@@ -2,6 +2,7 @@ package com.lulee007.mocklocations.presenter;
 
 import android.support.annotation.NonNull;
 
+import com.baidu.mapapi.map.BaiduMapOptions;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.lulee007.mocklocations.base.MLBasePresenter;
@@ -60,7 +61,11 @@ public class MainPresenter extends MLBasePresenter{
     }
 
     public void configBaiduMap() {
-        mainView.configBaiduMap();
+        BaiduMapOptions options = new BaiduMapOptions();
+        options.zoomControlsEnabled(false);
+        options.scaleControlEnabled(false);
+        options.rotateGesturesEnabled(false);
+        mainView.configBaiduMap(options);
     }
 
     public void processJson(String filePath) {

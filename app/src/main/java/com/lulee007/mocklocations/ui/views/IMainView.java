@@ -1,5 +1,7 @@
 package com.lulee007.mocklocations.ui.views;
 
+import com.baidu.mapapi.map.BaiduMapOptions;
+
 import java.util.List;
 
 /**
@@ -20,7 +22,7 @@ public interface IMainView {
 
     void checkMockLocationSetting();
 
-    void configBaiduMap();
+    void configBaiduMap(BaiduMapOptions options);
 
     void processJson(List<String> cPoints);
 }
