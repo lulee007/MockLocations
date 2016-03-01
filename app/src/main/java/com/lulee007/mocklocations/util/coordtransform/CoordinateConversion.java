@@ -1,5 +1,7 @@
 package com.lulee007.mocklocations.util.coordtransform;
 
+import com.lulee007.mocklocations.model.CPoint;
+
 /**
  * 地图坐标转换 google,baidu,gps
  *

@@ -17,7 +17,7 @@ import com.baidu.mapapi.utils.DistanceUtil;
 import com.google.gson.Gson;
 import com.lulee007.mocklocations.R;
 import com.lulee007.mocklocations.ui.views.DrawPanelView;
-import com.lulee007.mocklocations.util.coordtransform.CPoint;
+import com.lulee007.mocklocations.model.CPoint;
 import com.lulee007.mocklocations.util.coordtransform.CoordinateConversion;
 import com.orhanobut.logger.Logger;
 
@@ -31,6 +31,8 @@ import rx.functions.Action1;
  * User: lulee007@live.com
  * Date: 2016-02-25
  * Time: 16:26
+ * 接收来自{@link DrawPanelView}的绘制控制信息 {@link com.lulee007.mocklocations.ui.views.DrawPanelView.DrawActionEvent}
+ * 控制地图{@link BaiduMap}是否可以移动地图，绘制轨迹
  */
 public class DrawTool {
     private BaiduMap mBaiduMap;
@@ -38,9 +40,11 @@ public class DrawTool {
     private List<LatLng> mPoints;
     private PolylineOptions mPolylineOptions;
     private Polyline mPolyline;
+    /**
+     * 是否可以绘制
+     */
     private boolean isInEditMode;
     private Subscription drawActionSubscription;
-    private Subscription mapPanSubscription;
 
 
     public DrawTool(BaiduMap baiduMap, Context mContext) {
@@ -52,42 +56,33 @@ public class DrawTool {
 
     public void begin() {
         Logger.d("进入新的编辑！");
-        Logger.json(new Gson().toJson(mPoints));
-
-        isInEditMode = true;
         mPoints.clear();
         mBaiduMap.clear();
 
     }
 
     public void complete() {
-        isInEditMode = false;
         Logger.d("完成编辑！");
         Logger.json(new Gson().toJson(mPoints));
+        //TODO 绘制终点到地图上
+
     }
 
     public void cancel() {
         Logger.d("取消编辑！");
-        Logger.json(new Gson().toJson(mPoints));
-
-        isInEditMode = false;
         mPoints.clear();
         mBaiduMap.clear();
     }
 
     public void save() {
-        isInEditMode = false;
         Logger.d("保存编辑！");
         new GpsJsonFileHelper(mContext).saveJson(mPoints);
-
     }
 
     public void onPause() {
-        isInEditMode = false;
     }
 
     public void onContinue() {
-        isInEditMode = true;
     }
 
     private void init() {
@@ -118,7 +113,7 @@ public class DrawTool {
                     return;
                 }
                 double dis = DistanceUtil.getDistance(xy, mPoints.get(mPoints.size() - 1));
-                if (dis > 0.2) {
+                if (dis > 0.05) {
                     Log.d("distance", String.format("%f", dis));
                     mPoints.add(xy);
 
@@ -132,28 +127,14 @@ public class DrawTool {
                 }
             }
         });
-        mapPanSubscription = RxBus.getDefault().toObserverable(DrawPanelView.MapPanEvent.class)
-                .subscribe(
-                        new Action1<DrawPanelView.MapPanEvent>() {
-                            @Override
-                            public void call(DrawPanelView.MapPanEvent mapPanEvent) {
-                                Logger.d("subscribe: toggle map pan, enable pan:%s", Boolean.toString(mapPanEvent.isPanEnabled()));
-                                mBaiduMap.getUiSettings().setScrollGesturesEnabled(mapPanEvent.isPanEnabled());
-                            }
-                        },
-                        new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                Logger.e(throwable, "map pan event error");
-                            }
-                        }
-                );
         drawActionSubscription = RxBus.getDefault().toObserverable(DrawPanelView.DrawActionEvent.class)
                 .subscribe(
                         new Action1<DrawPanelView.DrawActionEvent>() {
                             @Override
                             public void call(DrawPanelView.DrawActionEvent drawActionEvent) {
-                                Logger.d("subscribe: DrawActionEvent:%s", drawActionEvent.getDrawMode().toString());
+                                Logger.d("subscribe: DrawActionEvent：%s enable pan:%s",drawActionEvent.getDrawMode().toString(), Boolean.toString(drawActionEvent.isCanPanMap()));
+                                mBaiduMap.getUiSettings().setScrollGesturesEnabled(drawActionEvent.isCanPanMap());
+                                isInEditMode = !drawActionEvent.isCanPanMap();
                                 switch (drawActionEvent.getDrawMode()) {
                                     case TO_START:
                                         cancel();

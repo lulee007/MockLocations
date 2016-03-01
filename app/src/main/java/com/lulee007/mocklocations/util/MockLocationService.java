@@ -12,12 +12,10 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.util.Log;
 
-import com.lulee007.mocklocations.util.coordtransform.CPoint;
+import com.lulee007.mocklocations.model.CPoint;
 
 import java.util.ArrayList;
 import java.util.List;

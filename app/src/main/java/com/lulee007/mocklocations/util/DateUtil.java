@@ -14,6 +14,11 @@ import java.util.Locale;
  */
 public class DateUtil {
 
+    /**
+     * 计算 距离当前时间
+     * @param dateTimeStr yyyy-MM-dd HH:mm:ss
+     * @return 距离当前时间
+     */
     public static String upToNow(String dateTimeStr){
         try {
             String strDate = dateTimeStr.replace("T", " ").substring(0, 19);

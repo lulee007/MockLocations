@@ -1,6 +1,11 @@
 package com.lulee007.mocklocations.util;
 
+import android.app.ActivityManager;
+import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
+import android.provider.Settings;
+import android.util.Log;
 
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
@@ -10,7 +15,6 @@ import com.baidu.mapapi.map.MyLocationData;
 import com.google.gson.Gson;
 import com.lulee007.mocklocations.R;
 import com.lulee007.mocklocations.ui.views.EmulatorPanelView;
-import com.lulee007.mocklocations.util.coordtransform.CPoint;
 import com.orhanobut.logger.Logger;
 
 import java.util.List;
@@ -22,19 +26,26 @@ import rx.functions.Action1;
  * User: lulee007@live.com
  * Date: 2016-02-27
  * Time: 19:59
+ * <p>接收从 {@link EmulatorPanelView} 发送的控制信息，控制{@link MockLocationService}模拟线程状态
+ * start,pause,etc.
+ * <p>接收从 {@link MockLocationService} 发送来的最新位置信息，显示到 {@link BaiduMap} 当中.
  */
 public class MockLocationHelper {
 
+    private Context context;
     private BaiduMap baiduMap;
     private Subscription locationSubscription;
+    private List<String> data;
 
-    public MockLocationHelper(BaiduMap baiduMap) {
+
+    public MockLocationHelper(Context context, BaiduMap baiduMap) {
+        this.context = context;
 
         this.baiduMap = baiduMap;
         init();
     }
 
-    public void init() {
+    private void init() {
         locationSubscription = RxBus.getDefault().toObserverable(MockLocationService.LocationChangedEvent.class)
                 .subscribe(
                         new Action1<MockLocationService.LocationChangedEvent>() {
@@ -68,7 +79,8 @@ public class MockLocationHelper {
                             public void call(EmulatorPanelView.EmulatorPanelEvent emulatorPanelEvent) {
                                 switch (emulatorPanelEvent.getState()) {
                                     case OPEN_FILE:
-                                        loadGpsData(emulatorPanelEvent.getData());
+                                        //MainActivity will take this case
+//                                        loadGpsData(emulatorPanelEvent.getData());
                                         break;
                                     case START:
                                         start();
@@ -99,9 +111,12 @@ public class MockLocationHelper {
                 );
     }
 
-    public void loadGpsData(List<CPoint> data) {
+    public void loadGpsData(List<String> data) {
+        this.data = data;
         Logger.d("MockLocation Helper loadfile");
-
+//        Logger.json(new Gson().toJson(data));
+//        RxBus.getDefault().send();
+//        MockLocationService.startMockLocation();
     }
 
     public void start() {
@@ -122,6 +137,50 @@ public class MockLocationHelper {
 
     public void stop() {
         Logger.d("MockLocation Helper onStop");
+    }
+
+
+    /**
+     * 启动 GPS模拟服务
+     */
+    public void startMockLocationService() {
+        Intent serviceIntent = new Intent(context,
+                MockLocationService.class);
+        if (checkMockLocationService())
+            context.stopService(serviceIntent);
+        context.startService(serviceIntent);
+        Logger.d("try to start a service ");
+    }
+
+    public boolean isMockLocationSet() {
+        if (Settings.Secure.getString(context.getContentResolver(),
+                Settings.Secure.ALLOW_MOCK_LOCATION).contentEquals("1")) {
+            Logger.d("MockLocation is enable");
+            return true;
+        } else {
+            Logger.d("MockLocation is disable");
+            return false;
+        }
+    }
+
+    /**
+     * 检查MockLocationService是否已经启动
+     */
+    public boolean checkMockLocationService() {
+        ActivityManager activityManager = (ActivityManager) context
+                .getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningServiceInfo> serviceList = activityManager
+                .getRunningServices(Integer.MAX_VALUE);
+        if (!(serviceList.size() > 0)) {
+            return false;
+        }
+        for (int i = 0; i < serviceList.size(); i++) {
+            if (serviceList.get(i).service.getClassName().equals(
+                    MockLocationService.class.getName()) ) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

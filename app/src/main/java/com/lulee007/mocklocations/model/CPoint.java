@@ -1,4 +1,4 @@
-package com.lulee007.mocklocations.util.coordtransform;
+package com.lulee007.mocklocations.model;
 
 /**
  * 用于构造地图中的坐标点

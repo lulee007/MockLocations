@@ -7,7 +7,7 @@ import android.text.InputType;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.baidu.mapapi.model.LatLng;
 import com.google.gson.Gson;
-import com.lulee007.mocklocations.util.coordtransform.CPoint;
+import com.lulee007.mocklocations.model.CPoint;
 import com.lulee007.mocklocations.util.coordtransform.CoordinateConversion;
 import com.orhanobut.logger.Logger;
 
@@ -58,6 +58,7 @@ public class GpsJsonFileHelper {
                         sweetAlertDialog.setCancelable(false);
                         sweetAlertDialog.show();
                         Observable.from(mPoints)
+                                .subscribeOn(Schedulers.io())
                                 .map(new Func1<LatLng, CPoint>() {
                                     @Override
                                     public CPoint call(LatLng latLng) {
@@ -65,11 +66,9 @@ public class GpsJsonFileHelper {
                                     }
                                 })
                                 .toList()
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribeOn(Schedulers.io())
                                 .doOnNext(new Action1<List<CPoint>>() {
                                     @Override
-                                    public void call(List<CPoint> CPoints) {
+                                    public void call(List<CPoint> mCPoints) {
                                         String fileName = String.format(sAppFolder + "/%s_%s_%d.json", input.toString(), "BD", new Date().getTime());
                                         Logger.d("save file:%s", fileName);
                                         File dataFolder = new File(sAppFolder);
@@ -78,9 +77,8 @@ public class GpsJsonFileHelper {
 
                                         try {
                                             if (jsonFile.createNewFile()) {
-                                                FileOutputStream os = null;
-                                                os = new FileOutputStream(jsonFile);
-                                                os.write(new Gson().toJson(mPoints).getBytes());
+                                                FileOutputStream os = new FileOutputStream(jsonFile);
+                                                os.write(new Gson().toJson(mCPoints).getBytes());
                                                 os.flush();
                                                 os.close();
                                             }
@@ -89,6 +87,7 @@ public class GpsJsonFileHelper {
                                         }
                                     }
                                 })
+                                .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(
                                         new Action1<List<CPoint>>() {
                                             @Override
