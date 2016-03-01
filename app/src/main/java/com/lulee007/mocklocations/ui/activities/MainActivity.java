@@ -1,5 +1,6 @@
 package com.lulee007.mocklocations.ui.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.v7.widget.Toolbar;
@@ -18,7 +19,6 @@ import com.baidu.mapapi.map.Polyline;
 import com.baidu.mapapi.model.LatLng;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
-import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.lulee007.mocklocations.R;
 import com.lulee007.mocklocations.base.MLBaseActivity;
@@ -27,6 +27,7 @@ import com.lulee007.mocklocations.ui.views.DrawPanelView;
 import com.lulee007.mocklocations.ui.views.EmulatorPanelView;
 import com.lulee007.mocklocations.ui.views.IMainView;
 import com.lulee007.mocklocations.util.DrawTool;
+import com.lulee007.mocklocations.util.MLConstant;
 import com.lulee007.mocklocations.util.MockLocationHelper;
 import com.lulee007.mocklocations.util.RxBus;
 import com.nineoldandroids.animation.Animator;
@@ -42,7 +43,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import rx.Observable;
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -50,9 +50,6 @@ import rx.functions.Func1;
 public class MainActivity extends MLBaseActivity implements IMainView {
 
     BaiduMap mBaiduMap;
-    List<LatLng> points = new ArrayList<LatLng>();
-    OverlayOptions ooPolyline;
-    Polyline mPolyline;
 
     @Bind(R.id.tool_panel)
     RelativeLayout toolPanel;
@@ -61,10 +58,6 @@ public class MainActivity extends MLBaseActivity implements IMainView {
     @Bind(R.id.app_bar)
     AppBarLayout appBar;
 
-    @Bind(R.id.fab_show_draw_panel)
-    FloatingActionButton fabShowDrawPanel;
-    @Bind(R.id.fab_show_emulator_panel)
-    FloatingActionButton fabShowEmulatorPanel;
     @Bind(R.id.fabm_panel_switcher)
     FloatingActionsMenu fabmPanelSwitcher;
     @Bind(R.id.map_root)
@@ -90,37 +83,6 @@ public class MainActivity extends MLBaseActivity implements IMainView {
 
         mainPresenter = new MainPresenter(this);
         mainPresenter.initView();
-//        mainPresenter.showDrawPanel();
-
-
-//        mMapView.getMap().setOnMapLoadedCallback();
-
-
-//        ooPolyline = new PolylineOptions().width(6).points(points);
-
-//        //添加在地图中
-//        mPolyline = (Polyline) mBaiduMap.addOverlay(ooPolyline);
-//
-//        mBaiduMap.getUiSettings().setScrollGesturesEnabled(false);
-//        mBaiduMap.setOnMapTouchListener(new BaiduMap.OnMapTouchListener() {
-//            @Override
-//            public void onTouch(MotionEvent motionEvent) {
-//                LatLng xy = mBaiduMap.getProjection().fromScreenLocation(new Point((int) motionEvent.getX(), (int) motionEvent.getY()));
-//                Log.d("xy", String.format("x:%f   y:%f", xy.longitude, xy.latitude));
-//                double dis = DistanceUtil.getDistance(xy, points.get(points.size() - 1));
-//                if (dis > 0.2) {
-//                    Log.d("distance", String.format("%f", dis));
-//                    points.add(xy);
-//                    ooPolyline = new PolylineOptions().width(10)
-//                            .points(points);
-//                    mPolyline.remove();
-//                    mPolyline = (Polyline) mBaiduMap.addOverlay(ooPolyline);
-//                }
-//            }
-//        });
-
-
-
 
     }
 
@@ -185,6 +147,26 @@ public class MainActivity extends MLBaseActivity implements IMainView {
                     }).subscribe();
         } else {
             mainPresenter.exitApp();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == MLConstant.ACTIVITY_REQUEST_CODE.JSON_FILES) {
+            if (resultCode == RESULT_OK) {
+                Logger.d("RESULT_OK: MLConstant.ACTIVITY_REQUEST_CODE.JSON_FILES");
+                String filePath = data.getStringExtra(JsonFilesActivity.BUNDLE_KEY_JSON_FILE);
+                mainPresenter.processJson(filePath);
+
+            } else if (resultCode == RESULT_CANCELED) {
+                //do nothing
+                Logger.d("RESULT_CANCELED: MLConstant.ACTIVITY_REQUEST_CODE.JSON_FILES");
+            }
+        } else if (requestCode == MLConstant.ACTIVITY_REQUEST_CODE.MOCK_LOCATION) {
+            // check it again
+            mainPresenter.checkMockLocationSetting();
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -306,31 +288,43 @@ public class MainActivity extends MLBaseActivity implements IMainView {
     @Override
     public void initView() {
 
-        /**
-         * 初始化地图部分
-         * 设置不显示地图缩放控件，比例尺控件
-         * 设置地图初始化中心点
-         */
-        BaiduMapOptions options = new BaiduMapOptions();
-        options.zoomControlsEnabled(false);
-        options.scaleControlEnabled(false);
-        mMapView = new MapView(this, options);
-        RelativeLayout.LayoutParams params_map = new RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
-        mapRoot.addView(mMapView, params_map);
-        mBaiduMap = mMapView.getMap();
+        //设置标题
+        setSupportActionBar(toolbar);
+        setTitle(getResources().getString(R.string.app_name));
+
+        //设置地图
+        mainPresenter.configBaiduMap();
+
+        //绑定轨迹绘制工具
+        drawTool = new DrawTool(mBaiduMap, this);
+
         //设置初始位置
         mBaiduMap.setMapStatus(MapStatusUpdateFactory.newLatLng(new LatLng(32.129927, 118.913191)));
 
-        /**
-         * 设置标题
-         */
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
+        //绑定位置模拟显示当前位置，控制模拟线程
+        mockLocationHelper = new MockLocationHelper(this, mBaiduMap);
+        //检查是否开启位置模拟功能
+        mainPresenter.checkMockLocationSetting();
 
-        drawTool = new DrawTool(mBaiduMap, this);
-
-        mockLocationHelper = new MockLocationHelper(mBaiduMap);
+        RxBus.getDefault().toObserverable(EmulatorPanelView.EmulatorPanelEvent.class)
+                .subscribe(
+                        new Action1<EmulatorPanelView.EmulatorPanelEvent>() {
+                            @Override
+                            public void call(EmulatorPanelView.EmulatorPanelEvent emulatorPanelEvent) {
+                                if (emulatorPanelEvent.getState() == EmulatorPanelView.EmulatorPanelState.OPEN_FILE) {
+                                    startActivityForResult(new Intent(MainActivity.this, JsonFilesActivity.class), MLConstant.ACTIVITY_REQUEST_CODE.JSON_FILES);
+                                } else {
+                                    // ignore , mocklocation helper will take these
+                                }
+                            }
+                        },
+                        new Action1<Throwable>() {
+                            @Override
+                            public void call(Throwable throwable) {
+                                Logger.e(throwable, "on EmulatorPanelEvent Error in MainAc");
+                            }
+                        }
+                );
     }
 
     @Override
@@ -338,6 +332,60 @@ public class MainActivity extends MLBaseActivity implements IMainView {
         //TODO stop gps service
         MobclickAgent.onKillProcess(this);
         android.os.Process.killProcess(android.os.Process.myPid());
+    }
+
+    @Override
+    public void openMockLocationSetting() {
+        Intent appDeploymentIntent = new Intent(
+                android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
+        startActivityForResult(appDeploymentIntent,
+                MLConstant.ACTIVITY_REQUEST_CODE.MOCK_LOCATION);
+    }
+
+    @Override
+    public void checkMockLocationSetting() {
+        if (mockLocationHelper.isMockLocationSet()) {
+            mockLocationHelper.startMockLocationService();
+        } else {
+            new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                    .setTitleText("提醒")
+                    .setContentText("模拟位置功能尚未开启，现在去开启？")
+                    .setConfirmText("去开启")
+                    .setCancelText("以后再说")
+                    .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sweetAlertDialog) {
+                            sweetAlertDialog.dismissWithAnimation();
+                            mainPresenter.openMockLocationSetting();
+
+                        }
+                    })
+                    .show();
+        }
+    }
+
+    /**
+     * 初始化地图部分
+     * 设置不显示地图缩放控件，比例尺控件
+     * 设置地图初始化中心点
+     */
+    @Override
+    public void configBaiduMap() {
+        BaiduMapOptions options = new BaiduMapOptions();
+        options.zoomControlsEnabled(false);
+        options.scaleControlEnabled(false);
+        options.rotateGesturesEnabled(false);
+        mMapView = new MapView(this, options);
+        RelativeLayout.LayoutParams params_map = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+        mapRoot.addView(mMapView, params_map);
+        mBaiduMap = mMapView.getMap();
+    }
+
+    @Override
+    public void processJson(List<String> cPoints) {
+        mockLocationHelper.loadGpsData(cPoints);
+        emulatorPanelView.onFileOpened();
     }
 
     @OnClick({R.id.fab_show_draw_panel, R.id.fab_show_emulator_panel})
