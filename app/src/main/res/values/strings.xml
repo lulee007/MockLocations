@@ -18,4 +18,5 @@
     <string name="to_holding_emulator">等待</string>
     <string name="to_continue_emulator">继续</string>
     <string name="to_stop_emulator">停止</string>
+    <string name="app_src">[open source: http://github.com/lulee007/MockLocations]</string>
 </resources>

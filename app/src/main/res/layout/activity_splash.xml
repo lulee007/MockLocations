@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#95de5f"
+    tools:context="com.lulee007.mocklocations.ui.activities.SplashActivity">
+
+    <RelativeLayout
+        android:id="@+id/rl_road_bg"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="180dp"
+        android:background="@drawable/round_image_selector">
+
+        <ImageView
+            android:id="@+id/iv_road"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:src="@mipmap/ic_launcher" />
+    </RelativeLayout>
+
+    <TextView
+        android:padding="@dimen/activity_horizontal_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:textSize="12sp"
+        android:textColor="@color/md_white_1000"
+        android:autoLink="web"
+        android:textColorLink="@color/md_white_1000"
+        android:layout_alignParentBottom="true"
+        android:text="@string/app_src"
+        />
+</RelativeLayout>

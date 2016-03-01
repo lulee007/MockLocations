@@ -36,7 +36,7 @@
             android:name="UMENG_APPKEY"
             android:value="${UMENG_APPKEY}" />
 
-        <activity android:name=".ui.activities.MainActivity" >
+        <activity android:name=".ui.activities.SplashActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -44,6 +44,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.activities.JsonFilesActivity" >
+        </activity>
+        <activity android:name=".ui.activities.MainActivity" >
         </activity>
     </application>
 
