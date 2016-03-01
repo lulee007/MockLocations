@@ -28,6 +28,8 @@ import com.lulee007.mocklocations.util.DrawTool;
 import com.lulee007.mocklocations.util.MLConstant;
 import com.lulee007.mocklocations.util.MockLocationHelper;
 import com.lulee007.mocklocations.util.RxBus;
+import com.mikepenz.aboutlibraries.Libs;
+import com.mikepenz.aboutlibraries.LibsBuilder;
 import com.nineoldandroids.animation.Animator;
 import com.orhanobut.logger.Logger;
 import com.umeng.analytics.MobclickAgent;
@@ -116,7 +118,7 @@ public class MainActivity extends MLBaseActivity implements IMainView {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_about:
-                //TODO about page
+                mainPresenter.showAbout();
                 return true;
             case R.id.action_exit:
                 mainPresenter.exitApp();
@@ -366,6 +368,7 @@ public class MainActivity extends MLBaseActivity implements IMainView {
      * 初始化地图部分
      * 设置不显示地图缩放控件，比例尺控件
      * 设置地图初始化中心点
+     *
      * @param options
      */
     @Override
@@ -382,6 +385,17 @@ public class MainActivity extends MLBaseActivity implements IMainView {
     public void processJson(List<String> cPoints) {
         mockLocationHelper.loadGpsData(cPoints);
         emulatorPanelView.onFileOpened();
+    }
+
+    @Override
+    public void showAbout() {
+        new LibsBuilder()
+                .withAboutIconShown(true)
+                .withAboutVersionShown(true)
+                .withAboutDescription("本软件使用了大量的开源库，旨在学习，主要使用安卓手机『开发者模式』中的『位置模拟』功能来做导航应用的测试工作。<br />具体用法:在地图上绘制一条线路，来模拟线路上的GPS位置。")
+                .withActivityStyle(Libs.ActivityStyle.LIGHT_DARK_TOOLBAR)
+                .withActivityTitle("关于")
+                .start(this);
     }
 
     @OnClick({R.id.fab_show_draw_panel, R.id.fab_show_emulator_panel})

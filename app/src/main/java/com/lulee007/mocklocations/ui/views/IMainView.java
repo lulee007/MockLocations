@@ -25,4 +25,6 @@ public interface IMainView {
     void configBaiduMap(BaiduMapOptions options);
 
     void processJson(List<String> cPoints);
+
+    void showAbout();
 }

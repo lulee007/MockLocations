@@ -139,4 +139,8 @@ public class MainPresenter extends MLBasePresenter{
     public void loadMore() {
 
     }
+
+    public void showAbout() {
+        mainView.showAbout();
+    }
 }

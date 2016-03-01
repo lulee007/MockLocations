@@ -3,11 +3,7 @@ package com.lulee007.mocklocations.base;
 import android.app.Application;
 
 
-import com.lulee007.mocklocations.util.DrawerImageLoaderHelper;
-import com.lulee007.mocklocations.util.IconFontUtil;
 import com.mcxiaoke.packer.helper.PackerNg;
-import com.mikepenz.iconics.Iconics;
-import com.mikepenz.iconics.typeface.GenericFont;
 import com.orhanobut.logger.Logger;
 import com.squareup.leakcanary.LeakCanary;
 import com.umeng.analytics.AnalyticsConfig;
@@ -25,8 +21,6 @@ public class MLApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        DrawerImageLoaderHelper.init();
 
         //pretty logger
         Logger.init("XTAppLog");
