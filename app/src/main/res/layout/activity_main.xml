@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context="com.lulee007.mocklocations.ui.activities.MainActivity">
 
     <include layout="@layout/app_bar" />
 
@@ -12,14 +12,14 @@
         android:id="@+id/map_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/app_bar" />
+        android:layout_below="@+id/toolbar" />
 
     <RelativeLayout
         android:id="@+id/tool_panel"
         android:layout_width="80dp"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/app_bar">
+        android:layout_below="@+id/toolbar">
 
     </RelativeLayout>
 

@@ -2,6 +2,7 @@
 
 buildscript {
     repositories {
+        mavenLocal()
         jcenter()
         maven {
             url "http://maven.bughd.com/public"
@@ -18,6 +19,7 @@ buildscript {
 
 allprojects {
     repositories {
+        mavenLocal()
         jcenter()
         maven {
             url "http://maven.bughd.com/public"

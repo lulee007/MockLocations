@@ -30,6 +30,9 @@ import com.lulee007.mocklocations.util.MockLocationHelper;
 import com.lulee007.mocklocations.util.RxBus;
 import com.mikepenz.aboutlibraries.Libs;
 import com.mikepenz.aboutlibraries.LibsBuilder;
+import com.mikepenz.aboutlibraries.LibsConfiguration;
+import com.mikepenz.aboutlibraries.util.Colors;
+import com.mikepenz.materialize.MaterializeBuilder;
 import com.nineoldandroids.animation.Animator;
 import com.orhanobut.logger.Logger;
 import com.umeng.analytics.MobclickAgent;
@@ -54,9 +57,6 @@ public class MainActivity extends MLBaseActivity implements IMainView {
     RelativeLayout toolPanel;
     @Bind(R.id.toolbar)
     Toolbar toolbar;
-    @Bind(R.id.app_bar)
-    AppBarLayout appBar;
-
     @Bind(R.id.fabm_panel_switcher)
     FloatingActionsMenu fabmPanelSwitcher;
     @Bind(R.id.map_root)
@@ -122,6 +122,9 @@ public class MainActivity extends MLBaseActivity implements IMainView {
                 return true;
             case R.id.action_exit:
                 mainPresenter.exitApp();
+                return true;
+            case R.id.action_settings:
+                //TODO setting page
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -287,10 +290,12 @@ public class MainActivity extends MLBaseActivity implements IMainView {
 
     @Override
     public void initView() {
-
+//        new MaterializeBuilder().withActivity(this)
+//                .withUseScrimInsetsLayout(true)
+//                .withStatusBarColorRes(R.color.primary_dark)
+//                .build();
         //设置标题
-        setSupportActionBar(toolbar);
-        setTitle(getResources().getString(R.string.app_name));
+        setActionBarWithTitle(toolbar,getResources().getString(R.string.app_name));
 
         //设置地图
         mainPresenter.configBaiduMap();
@@ -393,17 +398,15 @@ public class MainActivity extends MLBaseActivity implements IMainView {
                 .withAboutIconShown(true)
                 .withAboutVersionShown(true)
                 .withAboutDescription("本软件使用了大量的开源库，旨在学习，主要使用安卓手机『开发者模式』中的『位置模拟』功能来做导航应用的测试工作。<br />具体用法:在地图上绘制一条线路，来模拟线路上的GPS位置。")
-                .withActivityStyle(Libs.ActivityStyle.LIGHT_DARK_TOOLBAR)
                 .withActivityTitle("关于")
+                .withActivityTheme(R.style.AppTheme_AboutLibrary)
+                .withActivityStyle(Libs.ActivityStyle.LIGHT_DARK_TOOLBAR)
                 .start(this);
     }
 
     @OnClick({R.id.fab_show_draw_panel, R.id.fab_show_emulator_panel})
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.action_settings:
-                //TODO setting page
-                break;
             case R.id.fab_show_draw_panel:
                 mainPresenter.showDrawPanel();
                 break;

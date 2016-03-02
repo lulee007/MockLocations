@@ -16,16 +16,13 @@ public class JsonFilesActivity extends MLBaseActivity {
     public static final String BUNDLE_KEY_JSON_FILE = "JSON_FILE";
     @Bind(R.id.toolbar)
     Toolbar toolbar;
-    @Bind(R.id.app_bar)
-    AppBarLayout appBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_json_files);
         ButterKnife.bind(this);
-        setSupportActionBar(toolbar);
-        setTitle("轨迹列表");
+        setActionBarWithTitle(toolbar,"轨迹列表",true);
     }
 
     @Override

@@ -1,12 +1,19 @@
 <resources>
 
+
     <!-- 基本主题，不带actionbar. -->
-    <style name="AppTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="@style/BaseTheme">
+
+
+
+    </style>
+
+    <!-- 基本主题，不带actionbar. -->
+    <style name="BaseTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-
 
         <!-- Remove shadow below action bar Android < 5.0 -->
         <item name="android:windowContentOverlay">@null</item>
@@ -17,7 +24,7 @@
 
         <!-- 设置activity切换动画 -->
         <item name="android:windowAnimationStyle">@style/activityAnimation</item>
-        <item name="android:windowBackground">@color/md_green_200</item>
+        <item name="android:windowBackground">@color/md_white_1000</item>
 
     </style>
 
