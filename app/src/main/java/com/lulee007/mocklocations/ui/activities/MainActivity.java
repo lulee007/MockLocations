@@ -2,7 +2,6 @@ package com.lulee007.mocklocations.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.AppBarLayout;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,9 +29,6 @@ import com.lulee007.mocklocations.util.MockLocationHelper;
 import com.lulee007.mocklocations.util.RxBus;
 import com.mikepenz.aboutlibraries.Libs;
 import com.mikepenz.aboutlibraries.LibsBuilder;
-import com.mikepenz.aboutlibraries.LibsConfiguration;
-import com.mikepenz.aboutlibraries.util.Colors;
-import com.mikepenz.materialize.MaterializeBuilder;
 import com.nineoldandroids.animation.Animator;
 import com.orhanobut.logger.Logger;
 import com.umeng.analytics.MobclickAgent;
@@ -135,7 +131,9 @@ public class MainActivity extends MLBaseActivity implements IMainView {
     public void onBackPressed() {
         if (fabmPanelSwitcher.isExpanded()) {
             fabmPanelSwitcher.collapse();
+            return;
         }
+
         if (!doubleClickExit) {
             showToast("再按一次退出应用，后台运行请按 Home 键。");
             doubleClickExit = true;
@@ -151,6 +149,7 @@ public class MainActivity extends MLBaseActivity implements IMainView {
         } else {
             mainPresenter.exitApp();
         }
+
     }
 
     @Override
@@ -290,12 +289,9 @@ public class MainActivity extends MLBaseActivity implements IMainView {
 
     @Override
     public void initView() {
-//        new MaterializeBuilder().withActivity(this)
-//                .withUseScrimInsetsLayout(true)
-//                .withStatusBarColorRes(R.color.primary_dark)
-//                .build();
+
         //设置标题
-        setActionBarWithTitle(toolbar,getResources().getString(R.string.app_name));
+        setActionBarWithTitle(toolbar, getResources().getString(R.string.app_name));
 
         //设置地图
         mainPresenter.configBaiduMap();

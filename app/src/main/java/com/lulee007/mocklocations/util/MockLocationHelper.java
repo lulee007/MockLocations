@@ -53,6 +53,7 @@ public class MockLocationHelper {
                             public void call(MockLocationService.LocationChangedEvent locationChangedEvent) {
                                 Location location = locationChangedEvent.getLocation();
                                 Logger.d("接收到位置信息：%s", new Gson().toJson(location));
+                                baiduMap.setMyLocationEnabled(true);
                                 MyLocationData locData = new MyLocationData.Builder()
                                         .accuracy(location.getAccuracy())
                                                 // 此处设置开发者获取到的方向信息，顺时针0-360
@@ -60,8 +61,8 @@ public class MockLocationHelper {
                                         .longitude(location.getLongitude()).build();
                                 // 设置定位数据
                                 baiduMap.setMyLocationData(locData);
-                                BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.mipmap.ic_nav);
-                                MyLocationConfiguration myLocationConfiguration = new MyLocationConfiguration(MyLocationConfiguration.LocationMode.NORMAL, true, bitmapDescriptor);
+//                                BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.mipmap.ic_nav);
+                                MyLocationConfiguration myLocationConfiguration = new MyLocationConfiguration(MyLocationConfiguration.LocationMode.FOLLOWING, true, null);
                                 baiduMap.setMyLocationConfigeration(myLocationConfiguration);
                             }
                         },
@@ -114,29 +115,33 @@ public class MockLocationHelper {
     public void loadGpsData(List<String> data) {
         this.data = data;
         Logger.d("MockLocation Helper loadfile");
-//        Logger.json(new Gson().toJson(data));
-//        RxBus.getDefault().send();
-//        MockLocationService.startMockLocation();
     }
 
     public void start() {
         Logger.d("MockLocation Helper onStart");
+        MockLocationService.startMockLocation(this.data);
     }
 
     public void pause() {
         Logger.d("MockLocation Helper onPause");
+        MockLocationService.pauseMockLocation();
+
     }
 
     public void holding() {
         Logger.d("MockLocation Helper onHolding");
+        MockLocationService.waitMockLocation();
+
     }
 
     public void toContinue() {
         Logger.d("MockLocation Helper onContinue");
+        MockLocationService.continueMockLocation();
     }
 
     public void stop() {
         Logger.d("MockLocation Helper onStop");
+        MockLocationService.stopMockLocation();
     }
 
 
@@ -175,6 +180,7 @@ public class MockLocationHelper {
             return false;
         }
         for (int i = 0; i < serviceList.size(); i++) {
+            Logger.d(" service name:%s",serviceList.get(i).service.getClassName());
             if (serviceList.get(i).service.getClassName().equals(
                     MockLocationService.class.getName()) ) {
                 return true;

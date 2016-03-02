@@ -13,6 +13,8 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.SystemClock;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.lulee007.mocklocations.model.CPoint;
@@ -61,16 +63,8 @@ public class MockLocationService extends Service implements
         locationManager.addTestProvider(mocLocationProvider, false, false,
                 false, false, true, true, true, 0, 50);
         locationManager.setTestProviderEnabled(mocLocationProvider, true);
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for Activity#requestPermissions for more details.
-            return;
-        }
+
+
         locationManager.requestLocationUpdates(mocLocationProvider, 0, 0, this);
     }
 
@@ -108,31 +102,31 @@ public class MockLocationService extends Service implements
         }
         if (gpsData != null) {
             for (String str : gpsData) {
-                Log.v("gpsdata:,", str);
+                Log.v("gpsdata", str);
             }
         }
     }
 
     /**
-     * 阻塞当前线程，使之使用发送相同坐标的Location
+     * 阻塞当前线程，使之一直不发送Location
      */
     public static void pauseMockLocation() {
-        initParams(1);
+        initParams(2);
 
     }
 
     /**
-     * 阻塞当前线程，使之一直不发送Location
+     * 阻塞当前线程，继续发送Location
      */
     public static void continueMockLocation() {
         initParams(3);
     }
 
     /**
-     * 阻塞当前线程，使之一直不发送Location
+     * 阻塞当前线程，使之使用发送相同坐标的Location
      */
     public static void waitMockLocation() {
-        initParams(2);
+        initParams(1);
     }
 
     /**
@@ -237,6 +231,9 @@ public class MockLocationService extends Service implements
                                 location.setExtras(null);
                                 location.setBearing(bearing);
                                 location.setSpeed(3.0f);
+                                if(Build.VERSION.SDK_INT > 16){
+                                    location.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
+                                }
                                 Log.v("MockLocationThread", curCoordIndex + ":"
                                         + location.toString());
                                 p2Point = new CPoint(p1Point.getLng(), p1Point.getLat());
