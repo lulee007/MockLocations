@@ -27,4 +27,6 @@ public interface IMainView {
     void processJson(List<String> cPoints);
 
     void showAbout();
+
+    void switchToBackground();
 }

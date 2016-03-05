@@ -19,4 +19,11 @@
     <string name="to_continue_emulator">继续</string>
     <string name="to_stop_emulator">停止</string>
     <string name="app_src">[open source: http://github.com/lulee007/MockLocations]</string>
+    <string name="exit_tips">退出提示</string>
+    <string name="keep_running_in_bg">正在运行模拟轨迹模式，是否保留后台模拟运行？</string>
+    <string name="keep_running_in_bg_cancel">取消</string>
+    <string name="keep_running_in_bg_ok">切换到后台</string>
+    <string name="force_exit">直接退出</string>
+    <string name="choose_file">选择</string>
+    <string name="cancel">取消</string>
 </resources>

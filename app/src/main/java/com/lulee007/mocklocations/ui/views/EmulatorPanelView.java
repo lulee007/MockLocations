@@ -6,6 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.folderselector.FileChooserDialog;
 import com.jakewharton.rxbinding.view.RxView;
 import com.lulee007.mocklocations.R;
 import com.lulee007.mocklocations.util.RxBus;
@@ -66,6 +68,7 @@ public class EmulatorPanelView {
                 .subscribe(new Action1<Void>() {
                     @Override
                     public void call(Void aVoid) {
+
                         RxBus.getDefault().send(new EmulatorPanelEvent(EmulatorPanelState.OPEN_FILE));
                     }
                 });

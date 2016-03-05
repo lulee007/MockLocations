@@ -5,15 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.provider.Settings;
-import android.util.Log;
 
 import com.baidu.mapapi.map.BaiduMap;
-import com.baidu.mapapi.map.BitmapDescriptor;
-import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
 import com.google.gson.Gson;
-import com.lulee007.mocklocations.R;
 import com.lulee007.mocklocations.ui.views.EmulatorPanelView;
 import com.orhanobut.logger.Logger;
 
@@ -56,7 +52,7 @@ public class MockLocationHelper {
                                 baiduMap.setMyLocationEnabled(true);
                                 MyLocationData locData = new MyLocationData.Builder()
                                         .accuracy(location.getAccuracy())
-                                                // 此处设置开发者获取到的方向信息，顺时针0-360
+                                        // 此处设置开发者获取到的方向信息，顺时针0-360
                                         .direction(location.getBearing()).latitude(location.getLatitude())
                                         .longitude(location.getLongitude()).build();
                                 // 设置定位数据
@@ -180,13 +176,19 @@ public class MockLocationHelper {
             return false;
         }
         for (int i = 0; i < serviceList.size(); i++) {
-            Logger.d(" service name:%s",serviceList.get(i).service.getClassName());
+            Logger.d(" service name:%s", serviceList.get(i).service.getClassName());
             if (serviceList.get(i).service.getClassName().equals(
-                    MockLocationService.class.getName()) ) {
+                    MockLocationService.class.getName())) {
                 return true;
             }
         }
         return false;
     }
 
+    public void endService() {
+        Intent serviceIntent = new Intent(context,
+                MockLocationService.class);
+        if (checkMockLocationService())
+            context.stopService(serviceIntent);
+    }
 }

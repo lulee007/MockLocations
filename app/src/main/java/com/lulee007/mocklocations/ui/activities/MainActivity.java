@@ -1,13 +1,21 @@
 package com.lulee007.mocklocations.ui.activities;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.folderselector.FileChooserDialog;
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BaiduMapOptions;
@@ -24,6 +32,7 @@ import com.lulee007.mocklocations.ui.views.DrawPanelView;
 import com.lulee007.mocklocations.ui.views.EmulatorPanelView;
 import com.lulee007.mocklocations.ui.views.IMainView;
 import com.lulee007.mocklocations.util.DrawTool;
+import com.lulee007.mocklocations.util.GpsJsonFileHelper;
 import com.lulee007.mocklocations.util.MLConstant;
 import com.lulee007.mocklocations.util.MockLocationHelper;
 import com.lulee007.mocklocations.util.RxBus;
@@ -33,6 +42,7 @@ import com.nineoldandroids.animation.Animator;
 import com.orhanobut.logger.Logger;
 import com.umeng.analytics.MobclickAgent;
 
+import java.io.File;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -45,7 +55,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
 
-public class MainActivity extends MLBaseActivity implements IMainView {
+public class MainActivity extends MLBaseActivity implements IMainView ,FileChooserDialog.FileCallback{
 
     BaiduMap mBaiduMap;
 
@@ -133,9 +143,31 @@ public class MainActivity extends MLBaseActivity implements IMainView {
             fabmPanelSwitcher.collapse();
             return;
         }
+        if (emulatorPanelView != null && emulatorPanelView.isInEmulateMode()) {
+            new MaterialDialog.Builder(this)
+                    .title(R.string.exit_tips)
+                    .content(R.string.keep_running_in_bg)
+                    .positiveText(R.string.keep_running_in_bg_ok)
+                    .negativeText(R.string.keep_running_in_bg_cancel)
+                    .neutralText(R.string.force_exit)
+                    .onNeutral(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            mainPresenter.exitApp();
+                        }
+                    })
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            mainPresenter.switchToBackground();
+                        }
+                    })
+                    .show();
+            return;
+        }
 
         if (!doubleClickExit) {
-            showToast("再按一次退出应用，后台运行请按 Home 键。");
+            showToast("再按一次退出应用。");
             doubleClickExit = true;
             Observable.timer(2, TimeUnit.SECONDS)
                     .observeOn(AndroidSchedulers.mainThread())
@@ -157,8 +189,9 @@ public class MainActivity extends MLBaseActivity implements IMainView {
         if (requestCode == MLConstant.ACTIVITY_REQUEST_CODE.JSON_FILES) {
             if (resultCode == RESULT_OK) {
                 Logger.d("RESULT_OK: MLConstant.ACTIVITY_REQUEST_CODE.JSON_FILES");
-                String filePath = data.getStringExtra(JsonFilesActivity.BUNDLE_KEY_JSON_FILE);
-                mainPresenter.processJson(filePath);
+                String filePath = data.getStringExtra(LocationFilesActivity.BUNDLE_KEY_JSON_FILE);
+                if (filePath != null)
+                    mainPresenter.processJson(filePath);
 
             } else if (resultCode == RESULT_CANCELED) {
                 //do nothing
@@ -313,7 +346,16 @@ public class MainActivity extends MLBaseActivity implements IMainView {
                             @Override
                             public void call(EmulatorPanelView.EmulatorPanelEvent emulatorPanelEvent) {
                                 if (emulatorPanelEvent.getState() == EmulatorPanelView.EmulatorPanelState.OPEN_FILE) {
-                                    startActivityForResult(new Intent(MainActivity.this, JsonFilesActivity.class), MLConstant.ACTIVITY_REQUEST_CODE.JSON_FILES);
+                                    new FileChooserDialog.Builder(MainActivity.this)
+                                            .chooseButton(R.string.choose_file)  // changes label of the choose button
+                                            .cancelButton(R.string.cancel)
+                                            .initialPath(GpsJsonFileHelper.sAppFolder)  // changes initial path, defaults to external storage directory
+                                            .mimeType("text/plain") // Optional MIME type filter
+
+                                            .tag("choose-location-file-id")
+                                            .show();
+
+                                    //startActivityForResult(new Intent(MainActivity.this, LocationFilesActivity.class), MLConstant.ACTIVITY_REQUEST_CODE.JSON_FILES);
                                 } else {
                                     // ignore , mocklocation helper will take these
                                 }
@@ -331,6 +373,7 @@ public class MainActivity extends MLBaseActivity implements IMainView {
     @Override
     public void exitApp() {
         //TODO stop gps service
+        mockLocationHelper.endService();
         MobclickAgent.onKillProcess(this);
         android.os.Process.killProcess(android.os.Process.myPid());
     }
@@ -400,6 +443,21 @@ public class MainActivity extends MLBaseActivity implements IMainView {
                 .start(this);
     }
 
+    @Override
+    public void switchToBackground() {
+        PackageManager pm = getPackageManager();
+        ResolveInfo homeInfo = pm.resolveActivity(
+                new Intent(Intent.ACTION_MAIN)
+                        .addCategory(Intent.CATEGORY_HOME), 0);
+        ActivityInfo ai = homeInfo.activityInfo;
+        Intent startIntent = new Intent(Intent.ACTION_MAIN);
+        startIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        startIntent
+                .setComponent(new ComponentName(ai.packageName, ai.name));
+        startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(startIntent);
+    }
+
     @OnClick({R.id.fab_show_draw_panel, R.id.fab_show_emulator_panel})
     public void onClick(View view) {
         switch (view.getId()) {
@@ -410,5 +468,11 @@ public class MainActivity extends MLBaseActivity implements IMainView {
                 mainPresenter.showEmulatorPanel();
                 break;
         }
+    }
+
+    @Override
+    public void onFileSelection(@NonNull FileChooserDialog dialog, @NonNull File file) {
+        dialog.dismiss();
+        mainPresenter.processJson(file.getAbsolutePath());
     }
 }

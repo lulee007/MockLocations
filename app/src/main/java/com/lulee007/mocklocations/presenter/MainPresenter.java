@@ -143,4 +143,10 @@ public class MainPresenter extends MLBasePresenter{
     public void showAbout() {
         mainView.showAbout();
     }
+
+    public void switchToBackground() {
+        mainView.switchToBackground();
+    }
+
+
 }

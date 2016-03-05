@@ -57,7 +57,7 @@ public abstract class MLBaseAdapter<T> extends UltimateViewAdapter {
 
 
     public interface ItemListener {
-        void onItemClick(Object item);
+        void onItemClick(int position,Object item);
     }
 
     protected ItemListener itemListener;
