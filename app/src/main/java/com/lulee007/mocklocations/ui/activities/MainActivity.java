@@ -436,7 +436,7 @@ public class MainActivity extends MLBaseActivity implements IMainView ,FileChoos
         new LibsBuilder()
                 .withAboutIconShown(true)
                 .withAboutVersionShown(true)
-                .withAboutDescription("本软件使用了大量的开源库，旨在学习，主要使用安卓手机『开发者模式』中的『位置模拟』功能来做导航应用的测试工作。<br />具体用法:在地图上绘制一条线路，来模拟线路上的GPS位置。")
+                .withAboutDescription(getResources().getString(R.string.about_description))
                 .withActivityTitle("关于")
                 .withActivityTheme(R.style.AppTheme_AboutLibrary)
                 .withActivityStyle(Libs.ActivityStyle.LIGHT_DARK_TOOLBAR)

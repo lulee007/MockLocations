@@ -26,4 +26,5 @@
     <string name="force_exit">直接退出</string>
     <string name="choose_file">选择</string>
     <string name="cancel">取消</string>
+    <string name="about_description">本软件使用了大量的开源库，旨在学习，主要使用安卓手机『开发者模式』中的『位置模拟』功能来做导航应用的测试工作。</string>
 </resources>
