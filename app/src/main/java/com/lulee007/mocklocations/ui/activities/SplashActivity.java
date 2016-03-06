@@ -40,7 +40,6 @@ public class SplashActivity extends MLBaseActivity implements ISplashView {
         splashPresenter.setAsFullScreen();
         splashPresenter.showWelcome();
         splashPresenter.waitForEnd();
-
     }
 
     @Override
@@ -81,9 +80,7 @@ public class SplashActivity extends MLBaseActivity implements ISplashView {
 
     @Override
     public void launchMainActivity() {
-
         startActivity(MainActivity.class);
         finish();
-
     }
 }
