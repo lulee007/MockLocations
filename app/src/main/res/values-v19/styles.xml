@@ -5,9 +5,8 @@
 
     </style>
 
-    <style name="AppTheme.AboutLibrary" parent="@style/AboutLibrariesTheme">
+    <style name="AppTheme.AboutLibrary" parent="@style/AboutLibrariesTheme.Light">
         <item name="android:windowTranslucentStatus">true</item>
-
     </style>
 
 </resources>
