@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
@@ -26,6 +27,8 @@ public class SplashActivity extends MLBaseActivity implements ISplashView {
     RelativeLayout rlRoadBg;
     @Bind(R.id.iv_road)
     ImageView ivRoad;
+    @Bind(R.id.tv_app_name)
+    TextView tvAppName;
     private SplashPresenter splashPresenter;
 
     @Override
@@ -51,19 +54,25 @@ public class SplashActivity extends MLBaseActivity implements ISplashView {
     public void showWelcome() {
         ivRoad.setVisibility(View.GONE);
         rlRoadBg.setVisibility(View.GONE);
-        Observable.timer(600, TimeUnit.MILLISECONDS)
+        tvAppName.setVisibility(View.GONE);
+        Observable.timer(700, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Long>() {
                     @Override
                     public void call(Long aLong) {
                         ivRoad.setVisibility(View.VISIBLE);
                         rlRoadBg.setVisibility(View.VISIBLE);
+                        tvAppName.setVisibility(View.VISIBLE);
                         YoYo.with(Techniques.Landing)
                                 .duration(500)
                                 .playOn(rlRoadBg);
                         YoYo.with(Techniques.RotateInDownRight)
                                 .duration(700)
                                 .playOn(ivRoad);
+                        YoYo.with(Techniques.FlipInX)
+                                .duration(1100)
+                                .playOn(tvAppName);
+
                     }
                 });
 
