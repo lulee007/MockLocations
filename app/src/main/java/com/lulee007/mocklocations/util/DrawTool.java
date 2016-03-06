@@ -1,7 +1,10 @@
 package com.lulee007.mocklocations.util;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.support.annotation.DrawableRes;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -16,8 +19,8 @@ import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.utils.DistanceUtil;
 import com.google.gson.Gson;
 import com.lulee007.mocklocations.R;
-import com.lulee007.mocklocations.ui.views.DrawPanelView;
 import com.lulee007.mocklocations.model.CPoint;
+import com.lulee007.mocklocations.ui.views.DrawPanelView;
 import com.lulee007.mocklocations.util.coordtransform.CoordinateConversion;
 import com.orhanobut.logger.Logger;
 
@@ -64,8 +67,9 @@ public class DrawTool {
     public void complete() {
         Logger.d("完成编辑！");
         Logger.json(new Gson().toJson(mPoints));
-        //TODO 绘制终点到地图上
-
+        if (mPoints.size() > 0) {
+            addMarkerToBaiduMap(mPoints.get(mPoints.size() - 1), R.mipmap.location_end, mBaiduMap);
+        }
     }
 
     public void cancel() {
@@ -100,12 +104,7 @@ public class DrawTool {
                 if (mPoints.size() == 1) {
                     // 添加圆 作为起点
                     //准备 marker 的图片
-                    BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.mipmap.point);
-                    OverlayOptions ooCircle = new MarkerOptions()
-                            .position(xy)
-                            .animateType(MarkerOptions.MarkerAnimateType.grow)
-                            .icon(bitmap);
-                    mBaiduMap.addOverlay(ooCircle);
+                    addMarkerToBaiduMap(xy, R.mipmap.location_start, mBaiduMap);
                     mPoints.add(xy);
                     return;
                 } else if (mPoints.size() == 0) {
@@ -132,7 +131,7 @@ public class DrawTool {
                         new Action1<DrawPanelView.DrawActionEvent>() {
                             @Override
                             public void call(DrawPanelView.DrawActionEvent drawActionEvent) {
-                                Logger.d("subscribe: DrawActionEvent：%s enable pan:%s",drawActionEvent.getDrawMode().toString(), Boolean.toString(drawActionEvent.isCanPanMap()));
+                                Logger.d("subscribe: DrawActionEvent：%s enable pan:%s", drawActionEvent.getDrawMode().toString(), Boolean.toString(drawActionEvent.isCanPanMap()));
                                 mBaiduMap.getUiSettings().setScrollGesturesEnabled(drawActionEvent.isCanPanMap());
                                 isInEditMode = !drawActionEvent.isCanPanMap();
                                 switch (drawActionEvent.getDrawMode()) {
@@ -168,4 +167,16 @@ public class DrawTool {
                         }
                 );
     }
+
+    private void addMarkerToBaiduMap(LatLng xy, @DrawableRes int rsId, BaiduMap targetMap) {
+        Bitmap var2 = BitmapFactory.decodeResource(mContext.getResources(), rsId);
+
+        BitmapDescriptor bitmap = BitmapDescriptorFactory.fromBitmap(ImageUtil.fitBitmap(var2,60));
+        OverlayOptions ooCircle = new MarkerOptions()
+                .position(xy)
+                .animateType(MarkerOptions.MarkerAnimateType .grow)
+                .icon(bitmap);
+        targetMap.addOverlay(ooCircle);
+    }
+
 }
