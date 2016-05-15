@@ -1,12 +1,10 @@
 package com.lulee007.mocklocations.util;
 
-import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -14,7 +12,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.lulee007.mocklocations.model.CPoint;
@@ -35,14 +32,14 @@ public class MockLocationService extends Service implements
     public static boolean finished = false;
     public static boolean pause = false;
     public static boolean wait = false;
-    private static boolean destoryed = false;
+    private static boolean destroyed = false;
     private static int sequence = 1000;
     private static final int MinSequnce = 1000;
 
     @Override
     public void onStart(Intent intent, int startId) {
         Log.v(LOG_TAG, "onStart!");
-        destoryed = false;
+        destroyed = false;
     }
 
     @Override
@@ -53,11 +50,11 @@ public class MockLocationService extends Service implements
     }
 
     /**
-     * 初始化 mocklocation所需变量
+     * 初始化 mocklocation 所需变量
      */
     @TargetApi(Build.VERSION_CODES.M)
     private void initParams() {
-        gpsData = new ArrayList<String>();
+        gpsData = new ArrayList<>();
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         mocLocationProvider = LocationManager.GPS_PROVIDER;
         locationManager.addTestProvider(mocLocationProvider, false, false,
@@ -88,7 +85,7 @@ public class MockLocationService extends Service implements
             if (gpsData != null)
                 gpsData.clear();
             else
-                gpsData = new ArrayList<String>();
+                gpsData = new ArrayList<>();
             gpsData.addAll(data);
             if (finished && mockLocationThread.isAlive()) {
                 finished = false;
@@ -193,7 +190,7 @@ public class MockLocationService extends Service implements
                 return;
             int curCoordIndex = 0;
             Location location = null;
-            while (!destoryed) {// 由于无法多次对thread进行start，所以只能用标志位来表示是否停止线程
+            while (!destroyed) {// 由于无法多次对thread进行start，所以只能用标志位来表示是否停止线程
                 if (!finished) {
                     try {
                         Thread.sleep(sequence);
@@ -222,7 +219,7 @@ public class MockLocationService extends Service implements
                                     p2Point = new CPoint(longitude, latitude);
                                 }
                                 p1Point = new CPoint(longitude, latitude);
-                                float bearing = (float) getAngleby2Point(p2Point, p1Point);
+                                float bearing = (float) getAngleBy2Point(p2Point, p1Point);
                                 location = new Location(mocLocationProvider);
                                 location.setLatitude(latitude);
                                 location.setLongitude(longitude);
@@ -281,7 +278,7 @@ public class MockLocationService extends Service implements
     public void onDestroy() {
         super.onDestroy();
         Log.v(LOG_TAG, "onDestroy");
-        destoryed = true;
+        destroyed = true;
     }
 
     @Override
@@ -324,15 +321,7 @@ public class MockLocationService extends Service implements
         }
     }
 
-    public static void removeActivity(Activity ac) {
-        if (activities == null)
-            return;
-        int acIndex = activities.indexOf(ac);
-        if (acIndex != -1)
-            activities.remove(acIndex);
-    }
-
-    public static double getAngleby2Point(CPoint p1, CPoint p2) {
+    public static double getAngleBy2Point(CPoint p1, CPoint p2) {
         // 前进中的2点
         // 用于图转动的角度
         double x = p2.getLng() - p1.getLng();

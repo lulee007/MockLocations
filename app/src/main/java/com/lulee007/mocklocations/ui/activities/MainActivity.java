@@ -55,7 +55,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
 
-public class MainActivity extends MLBaseActivity implements IMainView ,FileChooserDialog.FileCallback{
+public class MainActivity extends MLBaseActivity implements IMainView, FileChooserDialog.FileCallback {
 
     BaiduMap mBaiduMap;
 
@@ -76,6 +76,7 @@ public class MainActivity extends MLBaseActivity implements IMainView ,FileChoos
     private boolean doubleClickExit;
     private DrawTool drawTool;
     private MockLocationHelper mockLocationHelper;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +107,7 @@ public class MainActivity extends MLBaseActivity implements IMainView ,FileChoos
         //在activity执行onResume时执行mMapView. onResume ()，实现地图生命周期管理
         mMapView.onResume();
     }
+
 
     @Override
     protected void onPause() {
@@ -198,8 +200,10 @@ public class MainActivity extends MLBaseActivity implements IMainView ,FileChoos
                 Logger.d("RESULT_CANCELED: MLConstant.ACTIVITY_REQUEST_CODE.JSON_FILES");
             }
         } else if (requestCode == MLConstant.ACTIVITY_REQUEST_CODE.MOCK_LOCATION) {
-            // check it again
-            mainPresenter.checkMockLocationSetting();
+            if (mockLocationHelper.isMockLocationSet()) {
+                mockLocationHelper.startMockLocationService();
+                mainPresenter.showEmulatorPanel();
+            }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
@@ -320,9 +324,9 @@ public class MainActivity extends MLBaseActivity implements IMainView ,FileChoos
                 .playOn(toolPanel);
     }
 
+
     @Override
     public void initView() {
-
         //设置标题
         setActionBarWithTitle(toolbar, getResources().getString(R.string.app_name));
 
@@ -337,8 +341,6 @@ public class MainActivity extends MLBaseActivity implements IMainView ,FileChoos
 
         //绑定位置模拟显示当前位置，控制模拟线程
         mockLocationHelper = new MockLocationHelper(this, mBaiduMap);
-        //检查是否开启位置模拟功能
-        mainPresenter.checkMockLocationSetting();
 
         RxBus.getDefault().toObserverable(EmulatorPanelView.EmulatorPanelEvent.class)
                 .subscribe(
@@ -372,7 +374,6 @@ public class MainActivity extends MLBaseActivity implements IMainView ,FileChoos
 
     @Override
     public void exitApp() {
-        //TODO stop gps service
         mockLocationHelper.endService();
         MobclickAgent.onKillProcess(this);
         android.os.Process.killProcess(android.os.Process.myPid());
@@ -389,7 +390,8 @@ public class MainActivity extends MLBaseActivity implements IMainView ,FileChoos
     @Override
     public void checkMockLocationSetting() {
         if (mockLocationHelper.isMockLocationSet()) {
-            mockLocationHelper.startMockLocationService();
+            // TODO
+            // mockLocationHelper.startMockLocationService();
         } else {
             new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
                     .setTitleText("提醒")
@@ -465,7 +467,11 @@ public class MainActivity extends MLBaseActivity implements IMainView ,FileChoos
                 mainPresenter.showDrawPanel();
                 break;
             case R.id.fab_show_emulator_panel:
-                mainPresenter.showEmulatorPanel();
+                if (mockLocationHelper.isMockLocationSet()) {
+                    mainPresenter.showEmulatorPanel();
+                } else {
+                    mainPresenter.checkMockLocationSetting();
+                }
                 break;
         }
     }
@@ -475,4 +481,5 @@ public class MainActivity extends MLBaseActivity implements IMainView ,FileChoos
         dialog.dismiss();
         mainPresenter.processJson(file.getAbsolutePath());
     }
+
 }

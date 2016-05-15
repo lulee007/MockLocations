@@ -6,6 +6,7 @@ public interface MLConstant {
     interface ACTIVITY_REQUEST_CODE {
         int JSON_FILES=100;
         int MOCK_LOCATION=200;
+        int PERMISSIONS=300;
     }
 
     interface XT_FONT {

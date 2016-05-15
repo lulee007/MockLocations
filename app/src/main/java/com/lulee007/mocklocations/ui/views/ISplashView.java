@@ -5,4 +5,8 @@ public interface ISplashView {
     void showWelcome();
 
     void launchMainActivity();
+
+    void requestPermissions(String[] permissions, String tips);
+
+    Boolean checkPermission(String s);
 }

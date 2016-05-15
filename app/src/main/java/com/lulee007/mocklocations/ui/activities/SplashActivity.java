@@ -1,7 +1,12 @@
 package com.lulee007.mocklocations.ui.activities;
 
+import android.Manifest;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -12,14 +17,22 @@ import com.lulee007.mocklocations.R;
 import com.lulee007.mocklocations.base.MLBaseActivity;
 import com.lulee007.mocklocations.presenter.SplashPresenter;
 import com.lulee007.mocklocations.ui.views.ISplashView;
+import com.lulee007.mocklocations.util.MLConstant;
+import com.lulee007.mocklocations.util.PermissionsChecker;
+import com.orhanobut.logger.Logger;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func1;
 
 public class SplashActivity extends MLBaseActivity implements ISplashView {
 
@@ -82,5 +95,61 @@ public class SplashActivity extends MLBaseActivity implements ISplashView {
     public void launchMainActivity() {
         startActivity(MainActivity.class);
         finish();
+    }
+
+
+    @Override
+    public void requestPermissions(final String[] permissions, final String tips) {
+        SweetAlertDialog sweetAlertDialog = new SweetAlertDialog(SplashActivity.this, SweetAlertDialog.WARNING_TYPE)
+                .setTitleText("注意")
+                .setConfirmText("去开启")
+                .setContentText("权限")
+                .setCancelText("拒绝并退出")
+                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sweetAlertDialog) {
+                        sweetAlertDialog.dismissWithAnimation();
+                        PermissionsActivity.startActivityForResult(SplashActivity.this, MLConstant.ACTIVITY_REQUEST_CODE.PERMISSIONS, permissions);
+
+                    }
+                })
+                .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sweetAlertDialog) {
+                        sweetAlertDialog.dismiss();
+                        finish();
+                    }
+                });
+        sweetAlertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                SweetAlertDialog alertDialog = (SweetAlertDialog) dialog;
+                TextView text = (TextView) alertDialog.findViewById(R.id.content_text);
+//                android.view.ViewGroup.LayoutParams layoutParams = text.getLayoutParams();
+//                layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                text.setGravity(Gravity.LEFT);
+//                text.setLayoutParams(layoutParams);
+                text.setText("本应用需要以下权限才能正常使用：" + tips);
+            }
+        });
+        sweetAlertDialog.show();
+
+    }
+
+    @Override
+    public Boolean checkPermission(String s) {
+         PermissionsChecker permissionsChecker = new PermissionsChecker(this);
+        return permissionsChecker.lacksPermissions(s);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // 拒绝时, 关闭页面, 缺少主要权限, 无法运行
+        if (requestCode == MLConstant.ACTIVITY_REQUEST_CODE.PERMISSIONS && resultCode == PermissionsActivity.PERMISSIONS_DENIED) {
+            finish();
+        } else {
+            launchMainActivity();
+        }
     }
 }

@@ -1,15 +1,17 @@
 package com.lulee007.mocklocations.util;
 
 import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.provider.Settings;
+import android.os.Build;
 
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
 import com.google.gson.Gson;
+import com.lulee007.mocklocations.BuildConfig;
 import com.lulee007.mocklocations.ui.views.EmulatorPanelView;
 import com.orhanobut.logger.Logger;
 
@@ -154,14 +156,24 @@ public class MockLocationHelper {
     }
 
     public boolean isMockLocationSet() {
-        if (Settings.Secure.getString(context.getContentResolver(),
-                Settings.Secure.ALLOW_MOCK_LOCATION).contentEquals("1")) {
-            Logger.d("MockLocation is enable");
-            return true;
-        } else {
-            Logger.d("MockLocation is disable");
-            return false;
+
+        boolean isMockLocation = false;
+        try {
+            //if marshmallow
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                AppOpsManager opsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+                isMockLocation = (opsManager.checkOp(AppOpsManager.OPSTR_MOCK_LOCATION, android.os.Process.myUid(), BuildConfig.APPLICATION_ID) == AppOpsManager.MODE_ALLOWED);
+            } else {
+                // in marshmallow this will always return true
+                isMockLocation = !android.provider.Settings.Secure.getString(context.getContentResolver(), "mock_location").equals("0");
+            }
+        } catch (Exception e) {
+            return isMockLocation;
         }
+        Logger.d("MockLocation is enable?:%s", isMockLocation);
+
+        return isMockLocation;
+
     }
 
     /**
@@ -176,9 +188,9 @@ public class MockLocationHelper {
             return false;
         }
         for (int i = 0; i < serviceList.size(); i++) {
-            Logger.d(" service name:%s", serviceList.get(i).service.getClassName());
             if (serviceList.get(i).service.getClassName().equals(
                     MockLocationService.class.getName())) {
+                Logger.d("find old service");
                 return true;
             }
         }
