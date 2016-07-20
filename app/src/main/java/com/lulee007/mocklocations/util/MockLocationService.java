@@ -1,7 +1,6 @@
 package com.lulee007.mocklocations.util;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -22,19 +21,18 @@ import java.util.List;
 public class MockLocationService extends Service implements
         LocationListener {
 
-    public static String LOG_TAG = "SZMapMockLocationService";
-    public static List<String> gpsData;
-    public static List<Activity> activities = new ArrayList<Activity>();
-    public static LocationManager locationManager;
+    private static String LOG_TAG = "SZMapMockLocationService";
+    private static List<String> gpsData;
+    private static LocationManager locationManager;
 
-    public static MockLocationThread mockLocationThread;
-    public static String mocLocationProvider;
-    public static boolean finished = false;
-    public static boolean pause = false;
-    public static boolean wait = false;
+    private static MockLocationThread mockLocationThread;
+    private static String mocLocationProvider;
+    private static boolean finished = false;
+    private static boolean pause = false;
+    private static boolean wait = false;
     private static boolean destroyed = false;
     private static int sequence = 1000;
-    private static final int MinSequnce = 1000;
+    private static final int MinSequence = 1000;
 
     @Override
     public void onStart(Intent intent, int startId) {
@@ -45,8 +43,8 @@ public class MockLocationService extends Service implements
     @Override
     public void onCreate() {
         Log.v(LOG_TAG, "onCreate!");
-        initParams();
         super.onCreate();
+        initParams();
     }
 
     /**
@@ -168,7 +166,7 @@ public class MockLocationService extends Service implements
             Log.v(LOG_TAG, "speed < 0");
             return;
         }
-        MockLocationService.sequence = (int) (MinSequnce / d);
+        MockLocationService.sequence = (int) (MinSequence / d);
         Log.v(LOG_TAG, MockLocationService.sequence + " ---sequence");
     }
 
@@ -185,7 +183,8 @@ public class MockLocationService extends Service implements
 
         @Override
         public void run() {
-            CPoint p1Point = new CPoint(), p2Point = new CPoint();
+            CPoint p1Point, p2Point = new CPoint();
+            new CPoint();
             if (gpsData == null || gpsData.size() <= 0)
                 return;
             int curCoordIndex = 0;
@@ -245,7 +244,9 @@ public class MockLocationService extends Service implements
                                         mocLocationProvider, location);
                             } catch (SecurityException se) {
                                 finished = true;
-                                Log.v(LOG_TAG, " the ACCESS_MOCK_LOCATION permission is not present or the Settings.Secure.ALLOW_MOCK_LOCATION} system setting is not enabled");
+                                Log.e(LOG_TAG, " the ACCESS_MOCK_LOCATION permission is not present or the Settings.Secure.ALLOW_MOCK_LOCATION} system setting is not enabled");
+                            }catch (Exception ex){
+                                Log.e(LOG_TAG,"set test provider location error",ex);
                             }
                         }
 

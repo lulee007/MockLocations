@@ -5,7 +5,10 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -19,9 +22,14 @@ import com.afollestad.materialdialogs.folderselector.FileChooserDialog;
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BaiduMapOptions;
+import com.baidu.mapapi.map.BitmapDescriptor;
+import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.MarkerOptions;
+import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.utils.CoordinateConverter;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
@@ -33,6 +41,7 @@ import com.lulee007.mocklocations.ui.views.EmulatorPanelView;
 import com.lulee007.mocklocations.ui.views.IMainView;
 import com.lulee007.mocklocations.util.DrawTool;
 import com.lulee007.mocklocations.util.GpsJsonFileHelper;
+import com.lulee007.mocklocations.util.ImageUtil;
 import com.lulee007.mocklocations.util.MLConstant;
 import com.lulee007.mocklocations.util.MockLocationHelper;
 import com.lulee007.mocklocations.util.RxBus;
@@ -389,10 +398,7 @@ public class MainActivity extends MLBaseActivity implements IMainView, FileChoos
 
     @Override
     public void checkMockLocationSetting() {
-        if (mockLocationHelper.isMockLocationSet()) {
-            // TODO
-            // mockLocationHelper.startMockLocationService();
-        } else {
+        if (!mockLocationHelper.isMockLocationSet()) {
             new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
                     .setTitleText("提醒")
                     .setContentText("模拟位置功能尚未开启，现在去开启？")
@@ -468,7 +474,9 @@ public class MainActivity extends MLBaseActivity implements IMainView, FileChoos
                 break;
             case R.id.fab_show_emulator_panel:
                 if (mockLocationHelper.isMockLocationSet()) {
+                    mockLocationHelper.startMockLocationService();
                     mainPresenter.showEmulatorPanel();
+
                 } else {
                     mainPresenter.checkMockLocationSetting();
                 }

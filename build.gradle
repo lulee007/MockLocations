@@ -7,9 +7,10 @@ buildscript {
         maven {
             url "http://maven.bughd.com/public"
         }
+        mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.0.0'
+        classpath 'com.android.tools.build:gradle:2.2.0-alpha6'
         //添加fir插件依赖
         classpath 'im.fir:gradle-fir-publisher:1.0.0'
         // add packer-ng
@@ -25,6 +26,7 @@ allprojects {
             url "http://maven.bughd.com/public"
         }
         maven { url "https://jitpack.io" }
+        mavenCentral()
     }
 }
 

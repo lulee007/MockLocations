@@ -1,9 +1,11 @@
 package com.lulee007.mocklocations.base;
 
 import android.app.Application;
+import android.util.Log;
 
 
 import com.mcxiaoke.packer.helper.PackerNg;
+import com.orhanobut.logger.LogLevel;
 import com.orhanobut.logger.Logger;
 import com.squareup.leakcanary.LeakCanary;
 import com.umeng.analytics.AnalyticsConfig;
@@ -22,11 +24,11 @@ public class MLApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        //pretty logger
-        Logger.init("XTAppLog");
-
         //内存泄露检测
         LeakCanary.install(this);
+
+        //pretty logger
+        Logger.init("MLAppLog").setLogLevel(LogLevel.FULL);
 
         FIR.init(this);
 
@@ -36,7 +38,10 @@ public class MLApplication extends Application {
         // 或者使用 PackerNg.getMarket(Context,defaultValue)
         // 之后就可以使用了，比如友盟可以这样设置
         Logger.d("=====market:{%s}=====",market);
-        AnalyticsConfig.setChannel(market);
+        final String appkey = AnalyticsConfig.getAppkey(this);
+        MobclickAgent.UMAnalyticsConfig umAnalyticsConfig = new MobclickAgent.UMAnalyticsConfig(this,appkey,market, MobclickAgent.EScenarioType.E_UM_NORMAL);
+        MobclickAgent.startWithConfigure(umAnalyticsConfig);
+
         MobclickAgent.setDebugMode(true);
 
     }

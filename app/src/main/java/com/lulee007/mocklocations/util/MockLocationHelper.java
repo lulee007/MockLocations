@@ -10,8 +10,11 @@ import android.os.Build;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
+import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.utils.CoordinateConverter;
 import com.google.gson.Gson;
 import com.lulee007.mocklocations.BuildConfig;
+import com.lulee007.mocklocations.R;
 import com.lulee007.mocklocations.ui.views.EmulatorPanelView;
 import com.orhanobut.logger.Logger;
 
@@ -52,11 +55,17 @@ public class MockLocationHelper {
                                 Location location = locationChangedEvent.getLocation();
                                 Logger.d("接收到位置信息：%s", new Gson().toJson(location));
                                 baiduMap.setMyLocationEnabled(true);
+                                // 将GPS设备采集的原始GPS坐标转换成百度坐标
+                                CoordinateConverter converter  = new CoordinateConverter();
+                                converter.from(CoordinateConverter.CoordType.GPS);
+// sourceLatLng待转换坐标
+                                converter.coord(new LatLng(location.getLatitude(),location.getLongitude()));
+                                LatLng desLatLng = converter.convert();
                                 MyLocationData locData = new MyLocationData.Builder()
                                         .accuracy(location.getAccuracy())
                                         // 此处设置开发者获取到的方向信息，顺时针0-360
-                                        .direction(location.getBearing()).latitude(location.getLatitude())
-                                        .longitude(location.getLongitude()).build();
+                                        .direction(location.getBearing()).latitude(desLatLng.latitude)
+                                        .longitude(desLatLng.longitude).build();
                                 // 设置定位数据
                                 baiduMap.setMyLocationData(locData);
 //                                BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.mipmap.ic_nav);

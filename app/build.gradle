@@ -85,5 +85,7 @@ dependencies {
 
     compile 'com.tbruyelle.rxpermissions:rxpermissions:0.7.0@aar'
 
+    // geotools jts
+//    compile 'com.vividsolutions:jts:1.12'
 
 }
