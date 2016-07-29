@@ -14,7 +14,6 @@ import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.utils.CoordinateConverter;
 import com.google.gson.Gson;
 import com.lulee007.mocklocations.BuildConfig;
-import com.lulee007.mocklocations.R;
 import com.lulee007.mocklocations.ui.views.EmulatorPanelView;
 import com.orhanobut.logger.Logger;
 
@@ -56,10 +55,10 @@ public class MockLocationHelper {
                                 Logger.d("接收到位置信息：%s", new Gson().toJson(location));
                                 baiduMap.setMyLocationEnabled(true);
                                 // 将GPS设备采集的原始GPS坐标转换成百度坐标
-                                CoordinateConverter converter  = new CoordinateConverter();
+                                CoordinateConverter converter = new CoordinateConverter();
                                 converter.from(CoordinateConverter.CoordType.GPS);
 // sourceLatLng待转换坐标
-                                converter.coord(new LatLng(location.getLatitude(),location.getLongitude()));
+                                converter.coord(new LatLng(location.getLatitude(), location.getLongitude()));
                                 LatLng desLatLng = converter.convert();
                                 MyLocationData locData = new MyLocationData.Builder()
                                         .accuracy(location.getAccuracy())

@@ -21,7 +21,7 @@ import java.util.List;
 public class MockLocationService extends Service implements
         LocationListener {
 
-    private static String LOG_TAG = "SZMapMockLocationService";
+    private static String LOG_TAG = "MockLocationService";
     private static List<String> gpsData;
     private static LocationManager locationManager;
 
